@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>美國行旅 2025</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { 'jp-bg': '#F4F4F0', 'jp-card': '#FFFFFF', 'jp-text': '#2B2B2B', 'jp-accent': '#2F5D62', 'jp-sub': '#8A8A8A', 'tag-food': '#D66A59', 'tag-buy': '#E5B350' },
+                    fontFamily: { 'serif': ['"Noto Serif TC"', 'serif'], 'sans': ['"Noto Sans TC"', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #F4F4F0; font-family: 'Noto Sans TC', sans-serif; -webkit-tap-highlight-color: transparent; }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .ios-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
+        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+    </style>
+</head>
+<body class="text-jp-text h-screen flex flex-col overflow-hidden">
+    <div id="app" class="flex flex-col h-full">
+        <header class="bg-jp-bg px-6 pt-12 pb-4 flex justify-between items-end shrink-0">
+            <div><p class="text-sm text-jp-sub tracking-widest mb-1">TRAVEL ITINERARY</p><h1 class="text-3xl font-serif font-bold text-jp-accent">美國漫遊</h1></div>
+            <div class="text-right"><div class="text-xs text-jp-sub">Today</div><div class="text-xl font-bold font-serif">{{ currentDate }}</div></div>
+        </header>
+        <main class="flex-1 overflow-y-auto px-4 pb-24 hide-scrollbar">
+            <div v-if="currentTab === 'trip'" class="space-y-6">
+                <div class="flex space-x-3 overflow-x-auto pb-2 hide-scrollbar">
+                    <button v-for="(day, index) in itinerary" :key="index" @click="activeDayIndex = index" :class="activeDayIndex === index ? 'bg-jp-accent text-white shadow-lg' : 'bg-white text-jp-sub'" class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300">Day {{ day.day }}</button>
+                </div>
+                <div v-if="itinerary[activeDayIndex]" class="animate-fade-in">
+                    <div class="flex items-center justify-between mb-4"><h2 class="text-xl font-bold font-serif">{{ itinerary[activeDayIndex].date }}</h2><div class="flex items-center text-sm text-jp-sub bg-white px-3 py-1 rounded-full"><i class="fa-solid fa-cloud-sun mr-2 text-jp-accent"></i><span>{{ itinerary[activeDayIndex].weather }}</span></div></div>
+                    <div class="space-y-4">
+                        <div v-for="(item, i) in itinerary[activeDayIndex].items" :key="i" class="bg-jp-card p-5 rounded-2xl ios-shadow relative overflow-hidden">
+                            <div class="absolute top-0 right-0 p-4 opacity-10"><i :class="getIcon(item.type)" class="text-6xl text-jp-accent"></i></div>
+                            <div class="relative z-10">
+                                <span class="text-xs font-bold tracking-widest uppercase text-jp-sub mb-1 block">{{ item.time }} | {{ item.type }}</span>
+                                <h3 class="text-lg font-bold mb-1">{{ item.title }}</h3>
+                                <p class="text-sm text-gray-500 mb-3">{{ item.desc }}</p>
+                                <div class="flex flex-wrap gap-2 mb-4" v-if="item.tags"><span v-for="tag in item.tags" :class="tag.type === 'food' ? 'text-tag-food bg-red-50' : (tag.type === 'buy' ? 'text-tag-buy bg-yellow-50' : 'text-jp-accent bg-blue-50')" class="text-xs px-2 py-1 rounded border border-opacity-20 font-medium"><i class="fa-solid fa-star text-[10px] mr-1" v-if="tag.important"></i>{{ tag.text }}</span></div>
+                                <div class="flex space-x-3 mt-2"><button @click="openMap(item.location)" class="flex-1 bg-jp-accent text-white py-2 rounded-lg text-sm flex items-center justify-center active:scale-95 transition-transform"><i class="fa-solid fa-location-arrow mr-2"></i> 導航</button></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-if="currentTab === 'info'" class="space-y-4">
+                <h2 class="text-xl font-serif font-bold mb-4">旅程資料夾</h2>
+                <div class="bg-jp-card p-5 rounded-2xl ios-shadow border-l-4 border-jp-accent"><h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-plane-departure mr-2"></i>航班</h3><div class="text-sm space-y-2 text-gray-600"><p><span class="font-bold">去程(BR):</span> 2/12 19:00 抵達 SFO</p><p><span class="font-bold">內陸:</span> 2/16 SFO 20:16 -> LAS</p><p><span class="font-bold">回程(BR):</span> 2/21 LAX 22:50 起飛</p></div></div>
+                <div class="bg-jp-card p-5 rounded-2xl ios-shadow border-l-4 border-gray-400"><h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-bed mr-2"></i>住宿清單</h3><div class="text-sm space-y-2 text-gray-600"><p class="font-bold">SF: FOUND Hotel Carlton</p><p class="font-bold">Marina: Holiday Inn Express</p><p class="font-bold">LV: Jockey Club Suites</p><p class="font-bold">LA: Los Angeles City</p></div></div>
+                <div class="bg-red-50 p-5 rounded-2xl border border-red-100"><h3 class="font-bold text-red-800 mb-2"><i class="fa-solid fa-triangle-exclamation mr-2"></i>緊急</h3><a href="tel:911" class="block text-red-600 font-bold text-xl mb-1">911 (緊急)</a><a href="tel:+14155551234" class="block text-gray-600 text-sm">駐舊金山辦事處</a></div>
+            </div>
+            <div v-if="currentTab === 'wallet'" class="space-y-4">
+                 <div class="bg-jp-accent text-white p-6 rounded-2xl shadow-lg relative overflow-hidden"><div class="relative z-10"><p class="text-blue-100 text-sm">總支出 (USD)</p><p class="text-4xl font-serif font-bold mt-1">${{ totalExpense.toLocaleString() }}</p><div class="mt-4 flex space-x-2"><input v-model="newExpenseName" type="text" placeholder="項目" class="w-1/2 p-2 rounded text-black text-sm border-0"><input v-model.number="newExpenseAmount" type="number" placeholder="$" class="w-1/3 p-2 rounded text-black text-sm border-0"><button @click="addExpense" class="bg-tag-buy text-white w-10 rounded flex items-center justify-center"><i class="fa-solid fa-plus"></i></button></div></div></div>
+                 <div class="space-y-2"><div v-for="(exp, index) in expenses" :key="index" class="bg-white p-3 rounded-xl flex justify-between items-center ios-shadow"><span class="text-gray-700">{{ exp.name }}</span><span class="font-bold font-mono text-jp-accent">${{ exp.amount }}</span><button @click="removeExpense(index)" class="text-gray-300 text-xs">x</button></div></div>
+            </div>
+        </main>
+        <nav class="bg-white border-t border-gray-100 flex justify-around items-center pb-safe-bottom h-[80px] shrink-0 safe-bottom z-50">
+            <button @click="currentTab = 'trip'" :class="currentTab === 'trip' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3 py-2"><i class="fa-solid fa-map text-xl mb-1"></i><span class="text-[10px] font-medium">行程</span></button>
+            <button @click="currentTab = 'info'" :class="currentTab === 'info' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3 py-2"><i class="fa-solid fa-suitcase text-xl mb-1"></i><span class="text-[10px] font-medium">資訊</span></button>
+            <button @click="currentTab = 'wallet'" :class="currentTab === 'wallet' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3 py-2"><i class="fa-solid fa-wallet text-xl mb-1"></i><span class="text-[10px] font-medium">記帳</span></button>
+        </nav>
+    </div>
+    <script>
+        const { createApp } = Vue;
+        createApp({
+            data() {
+                return {
+                    currentTab: 'trip', 
+                    activeDayIndex: 0,
+                    newExpenseName: '',
+                    newExpenseAmount: null,
+                    expenses: [],
+                    itinerary: [
+                        { day: 1, date: "2/12 (四)", weather: "SF 12°C 🌧️", items: [{ time: "19:00", type: "transport", title: "抵達舊金山 (SFO)", desc: "入境約 1.5-2 小時。前往市區搭 Uber/Lyft 或 BART。", location: "San Francisco International Airport", tags: [{text: "長榮 BR", type: "info"}] }, { time: "21:30", type: "hotel", title: "入住：FOUND Hotel Carlton", desc: "Nob Hill 區，坡度陡。附近有 Trader Joe's。", location: "545 Jones St, San Francisco, CA 94102", tags: [{text: "不租車", type: "info"}] }] },
+                        { day: 2, date: "2/13 (五)", weather: "SF 14°C ☁️", items: [{ time: "08:30", type: "food", title: "Ferry Building 早餐", desc: "藍瓶創始店、Acme Bread。", location: "Ferry Building, San Francisco", tags: [{text: "必吃 Blue Bottle", type: "food"}] }, { time: "10:30", type: "attraction", title: "Chinatown / North Beach", desc: "中國城走到義大利區。", location: "Dragon's Gate", tags: [{text: "金門餅家", type: "food"}] }, { time: "14:00", type: "attraction", title: "九曲花街 & 藝術宮", desc: "Lombard Street 拍照。", location: "Lombard Street", tags: [] }, { time: "16:30", type: "attraction", title: "漁人碼頭 & Pier 39", desc: "看海獅，吃酸麵包濃湯。", location: "Pier 39", tags: [{text: "看海獅", type: "info"}, {text: "Boudin酸麵包", type: "food"}] }] },
+                        { day: 3, date: "2/14 (六)", weather: "Napa 16°C ☀️", items: [{ time: "09:00", type: "transport", title: "市區取車 -> Napa", desc: "前往租車點取車。", location: "Union Square, San Francisco", tags: [{text: "租車 Day 1", type: "transport"}, {text: "帶駕照", type: "important"}] }, { time: "11:30", type: "food", title: "Oxbow Public Market", desc: "午餐推薦 Gott's Roadside 漢堡。", location: "Oxbow Public Market", tags: [{text: "午餐", type: "food"}] }, { time: "13:30", type: "attraction", title: "酒莊巡禮", desc: "Castello di Amorosa 或 Beringer。", location: "Castello di Amorosa", tags: [{text: "需預約", type: "info"}] }, { time: "18:00", type: "transport", title: "返回 SF", desc: "最後一晚住 SF。", location: "FOUND Hotel Carlton", tags: [] }] },
+                        { day: 4, date: "2/15 (日)", weather: "海岸 15°C 🌤️", items: [{ time: "09:00", type: "attraction", title: "SF -> Monterey", desc: "漁人碼頭吃海鮮。", location: "Old Fisherman's Wharf, Monterey", tags: [{text: "海鮮午餐", type: "food"}] }, { time: "14:00", type: "attraction", title: "Big Sur 精華", desc: "Bixby Bridge 必拍。", location: "Bixby Creek Bridge", tags: [{text: "訊號差", type: "important"}] }, { time: "17:00", type: "attraction", title: "Carmel 小鎮", desc: "童話小鎮散步。", location: "Carmel Plaza", tags: [] }, { time: "20:00", type: "hotel", title: "入住 Holiday Inn Marina", desc: "含早餐。", location: "189 Seaside Cir, Marina, CA 93933", tags: [] }] },
+                        { day: 5, date: "2/16 (一)", weather: "移動 ☀️", items: [{ time: "09:00", type: "attraction", title: "McWay Falls", desc: "瀑布入海絕景。", location: "McWay Falls", tags: [{text: "絕景", type: "info"}] }, { time: "15:00", type: "transport", title: "SFO 機場還車", desc: "預留塞車時間，18:30 前還車。", location: "SFO Rental Car Center", tags: [{text: "加滿油", type: "important"}] }, { time: "20:16", type: "transport", title: "飛往 LV", desc: "BR: 20:16 - 21:58。", location: "Harry Reid International Airport", tags: [] }, { time: "23:00", type: "hotel", title: "入住 Jockey Club", desc: "位置極佳，在 Strip 中心。", location: "3700 S Las Vegas Blvd, Las Vegas", tags: [] }] },
+                        { day: 6, date: "2/17 (二)", weather: "LV 18°C ☀️", items: [{ time: "11:00", type: "attraction", title: "賭城大道 (北段)", desc: "威尼斯人、凱薩宮。", location: "The Venetian Las Vegas", tags: [] }, { time: "15:00", type: "attraction", title: "Bellagio 水舞", desc: "花園與水舞。", location: "Bellagio Hotel & Casino", tags: [{text: "每30分一場", type: "info"}] }, { time: "18:00", type: "food", title: "Buffet 晚餐", desc: "Bacchanal 或 Wicked Spoon。", location: "Cosmopolitan", tags: [{text: "排隊", type: "food"}] }] },
+                        { day: 7, date: "2/18 (三)", weather: "沙漠 20°C ☀️", items: [{ time: "09:00", type: "transport", title: "LV 取車 -> Hoover Dam", desc: "胡佛水壩。", location: "Hoover Dam", tags: [{text: "租車 Day 1", type: "transport"}] }, { time: "13:00", type: "attraction", title: "Valley of Fire", desc: "火焰谷：Elephant Rock, Fire Wave。", location: "Valley of Fire State Park", tags: [{text: "帶水", type: "important"}] }, { time: "19:00", type: "hotel", title: "入住 Henderson", desc: "近郊住宿。", location: "Henderson, NV", tags: [] }] },
+                        { day: 8, date: "2/19 (四)", weather: "移動 🌤️", items: [{ time: "09:00", type: "attraction", title: "Red Rock Canyon", desc: "需預約時段。", location: "Red Rock Canyon National Conservation Area", tags: [{text: "需預約", type: "important"}] }, { time: "14:00", type: "transport", title: "前往 LA", desc: "車程 4-5 小時。中途停 Barstow。", location: "Outlets at Barstow", tags: [{text: "In-N-Out", type: "food"}] }, { time: "19:00", type: "hotel", title: "抵達 LA", desc: "入住市區。", location: "Los Angeles", tags: [{text: "注意塞車", type: "info"}] }] },
+                        { day: 9, date: "2/20 (五)", weather: "LA 22°C ☀️", items: [{ time: "10:00", type: "attraction", title: "好萊塢 / The Grove", desc: "星光大道、逛街。", location: "The Grove", tags: [] }, { time: "16:00", type: "attraction", title: "Griffith Observatory", desc: "天文臺看夜景。", location: "Griffith Observatory", tags: [{text: "週一休", type: "info"}] }, { time: "19:00", type: "food", title: "Santa Monica", desc: "碼頭晚餐。", location: "Santa Monica Pier", tags: [] }] },
+                        { day: 10, date: "2/21 (六)", weather: "返程 ✈️", items: [{ time: "10:00", type: "attraction", title: "最後採買 / Urban Light", desc: "Citadel Outlets 或 LACMA。", location: "Urban Light", tags: [] }, { time: "19:00", type: "transport", title: "LAX 還車", desc: "預留時間還車。", location: "LAX Rental Car Return", tags: [{text: "加滿油", type: "important"}] }, { time: "22:50", type: "transport", title: "搭機返程", desc: "BR 飛往 TPE。", location: "Los Angeles International Airport (LAX)", tags: [{text: "平安", type: "info"}] }] }
+                    ]
+                }
+            },
+            computed: {
+                currentDate() { return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); },
+                totalExpense() { return this.expenses.reduce((sum, item) => sum + item.amount, 0); }
+            },
+            methods: {
+                getIcon(type) { const icons = { 'transport': 'fa-car', 'food': 'fa-utensils', 'attraction': 'fa-camera', 'hotel': 'fa-bed' }; return icons[type] || 'fa-circle'; },
+                openMap(loc) { if(loc) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'); },
+                addExpense() { if (this.newExpenseName && this.newExpenseAmount) { this.expenses.unshift({ name: this.newExpenseName, amount: this.newExpenseAmount }); this.newExpenseName = ''; this.newExpenseAmount = null; this.save(); } },
+                removeExpense(i) { this.expenses.splice(i, 1); this.save(); },
+                save() { localStorage.setItem('us_trip_exp', JSON.stringify(this.expenses)); }
+            },
+            mounted() { const saved = localStorage.getItem('us_trip_exp'); if (saved) this.expenses = JSON.parse(saved); }
+        }).mount('#app');
+    </script>
+</body>
+</html>
