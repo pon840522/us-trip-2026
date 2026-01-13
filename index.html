@@ -82,10 +82,10 @@
                     </div>
                     <i class="fa-solid fa-key absolute -bottom-2 -right-2 text-8xl opacity-10"></i>
                 </div>
-                <div class="bg-jp-card p-5 rounded-2xl ios-shadow border-l-4 border-jp-accent"><h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-plane-departure mr-2"></i>重要航班</h3><div class="text-sm space-y-2 text-gray-600"><p><span class="font-bold">2/12 抵達:</span> 19:00 SFO</p><p><span class="font-bold">2/16 內陸:</span> SFO -> Las Vegas (晚班機)</p><p><span class="font-bold">2/21 回程:</span> 22:50 LAX 起飛</p></div></div>
+                <div class="bg-jp-card p-5 rounded-2xl ios-shadow border-l-4 border-jp-accent"><h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-plane-departure mr-2"></i>重要航班</h3><div class="text-sm space-y-2 text-gray-600"><p><span class="font-bold">2/12 抵達:</span> 19:00 SFO (JX012)</p><p><span class="font-bold">2/16 內陸:</span> SFO -> Las Vegas (晚班機)</p><p><span class="font-bold">2/21 回程:</span> 22:50 LAX 起飛</p></div></div>
                 <div class="bg-jp-card p-5 rounded-2xl ios-shadow border-l-4 border-gray-400"><h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-bed mr-2"></i>住宿清單</h3><div class="text-sm space-y-2 text-gray-600">
                     <p><span class="font-bold text-jp-accent">SF:</span> FOUND Hotel Carlton</p>
-                    <p><span class="font-bold text-jp-accent">Napa:</span> Napa/Sonoma 飯店</p>
+                    <p><span class="font-bold text-jp-accent">SF機場:</span> Crowne Plaza SFO</p>
                     <p><span class="font-bold text-jp-accent">Marina:</span> Holiday Inn Express</p>
                     <p><span class="font-bold text-jp-accent">LV:</span> Jockey Club Suites</p>
                     <p><span class="font-bold text-jp-accent">Henderson:</span> Holiday Inn Express</p>
@@ -114,42 +114,44 @@
                     newExpenseName: '',
                     newExpenseAmount: null,
                     expenses: [],
-                    // 在這裡我加入了 lat, lon 經緯度座標
                     itinerary: [
                         { 
                             day: 1, date: "2/12 (四)", lat: 37.7749, lon: -122.4194, weather: "載入中...", weatherCode: 0,
                             items: [
-                                { time: "19:00", type: "transport", title: "抵達舊金山 (SFO)", desc: "入境約 1.5-2 小時。", location: "San Francisco International Airport", image: "https://images.unsplash.com/photo-1534050359320-02900022671e?w=800", tags: [{text: "長榮 BR", type: "info"}] },
+                                { time: "19:00", type: "transport", title: "抵達舊金山 (SFO)", desc: "入境約 1.5-2 小時。", location: "San Francisco International Airport", image: "https://images.unsplash.com/photo-1534050359320-02900022671e?w=800", tags: [{text: "JX012", type: "info"}] },
                                 { time: "21:30", type: "hotel", title: "入住：FOUND Hotel Carlton", desc: "Nob Hill 區。回飯店休息。", location: "545 Jones St, San Francisco, CA 94102", image: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800", tags: [{text: "不開車", type: "info"}] }
                             ] 
                         },
                         { 
                             day: 2, date: "2/13 (五)", lat: 37.7749, lon: -122.4194, weather: "載入中...", weatherCode: 0,
                             items: [
-                                { time: "08:30", type: "food", title: "Ferry Building 早餐", desc: "藍瓶創始店、Acme Bread。", location: "Ferry Building, San Francisco", image: "https://images.unsplash.com/photo-1596131460596-3b2d65017df8?w=800", tags: [] },
+                                { time: "08:30", type: "food", title: "Ferry Building 早餐", desc: "藍瓶創始店、Acme Bread。", location: "Ferry Building, San Francisco", image: "https://images.unsplash.com/photo-1558296225-27a922851897?w=800", tags: [] },
                                 { time: "10:30", type: "attraction", title: "市區觀光", desc: "Chinatown -> North Beach -> 九彎花街。", location: "Lombard Street", image: "https://images.unsplash.com/photo-1521464302861-ce943915d1c3?w=800", tags: [] },
                                 { time: "14:00", type: "attraction", title: "藝術宮 & 金門大橋", desc: "Palace of Fine Arts 與金門大橋觀景點。", location: "Golden Gate Bridge", image: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800", tags: [] },
-                                { time: "16:30", type: "attraction", title: "漁人碼頭 & Pier 39", desc: "看海獅，晚餐。", location: "Pier 39", image: "https://images.unsplash.com/photo-1557954932-d85c4709bc87?w=800", tags: [{text: "看海獅", type: "info"}] }
+                                { time: "16:30", type: "attraction", title: "漁人碼頭 & Pier 39", desc: "看海獅，晚餐。", location: "Pier 39", image: "https://images.unsplash.com/photo-1520627582531-e402d2c16a5e?w=800", tags: [{text: "看海獅", type: "info"}] },
+                                { time: "22:00", type: "hotel", title: "住宿：FOUND Hotel Carlton", desc: "市區最後一晚。", location: "545 Jones St, San Francisco, CA 94102", image: null, tags: [] }
                             ] 
                         },
                         { 
-                            day: 3, date: "2/14 (六)", lat: 38.2975, lon: -122.2869, weather: "載入中...", weatherCode: 0, // Napa
+                            day: 3, date: "2/14 (六)", lat: 38.2975, lon: -122.2869, weather: "載入中...", weatherCode: 0, 
                             items: [
                                 { time: "09:00", type: "transport", title: "市區取車 (Thrifty)", desc: "車型：Genesis G70 (Premium)\n取車點：364 O’Farrell St", location: "364 O'Farrell St, San Francisco", image: "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?w=800", tags: [{text: "租車", type: "important"}] },
-                                { time: "11:00", type: "attraction", title: "Napa / Sonoma 酒莊", desc: "酒莊參觀 1-2 間，Yountville 散步。", location: "Napa Valley", image: "https://images.unsplash.com/photo-1585553616435-2dc0a54e271d?w=800", tags: [{text: "喝酒不開車", type: "important"}] },
-                                { time: "20:00", type: "hotel", title: "住宿：Napa/Sonoma", desc: "入住當地飯店。", location: "Napa", image: "https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?w=800", tags: [] }
+                                { time: "12:00", type: "transport", title: "前往 Napa Valley", desc: "開車前往酒鄉。", location: "Napa Valley", image: "https://images.unsplash.com/photo-1585553616435-2dc0a54e271d?w=800", tags: [] },
+                                { time: "14:00", type: "attraction", title: "酒莊參觀", desc: "挑選 1-2 間簡單為主的酒莊。", location: "Napa Valley", image: "https://images.unsplash.com/photo-1516306580123-e6e52b1b7b5f?w=800", tags: [{text: "輕鬆逛", type: "info"}] },
+                                { time: "17:00", type: "food", title: "Napa 市區 / 晚餐", desc: "市區散步，享用晚餐後開車回 SFO。", location: "Napa Downtown", image: null, tags: [] },
+                                { time: "21:00", type: "hotel", title: "Crowne Plaza SFO", desc: "Crowne Plaza San Francisco Airport by IHG", location: "1177 Airport Blvd, Burlingame, CA 94010", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800", tags: [{text: "IHG", type: "info"}] }
                             ] 
                         },
                         { 
-                            day: 4, date: "2/15 (日)", lat: 36.6002, lon: -121.8947, weather: "載入中...", weatherCode: 0, // Monterey/Marina
+                            day: 4, date: "2/15 (日)", lat: 36.6002, lon: -121.8947, weather: "載入中...", weatherCode: 0,
                             items: [
-                                { time: "09:00", type: "transport", title: "Napa -> Monterey", desc: "前往海邊。", location: "Monterey", image: "https://images.unsplash.com/photo-1548685160-569df9193236?w=800", tags: [{text: "車程3.5hr", type: "info"}] },
+                                { time: "09:00", type: "transport", title: "SFO -> Monterey", desc: "前往海邊，車程約 2 小時。", location: "Monterey", image: "https://images.unsplash.com/photo-1548685160-569df9193236?w=800", tags: [{text: "租車 Day 2", type: "info"}] },
                                 { time: "13:00", type: "attraction", title: "Monterey & 17-Mile", desc: "Cannery Row, Old Fisherman’s Wharf。", location: "17 Mile Dr", image: "https://images.unsplash.com/photo-1549651717-d20f66657929?w=800", tags: [] },
                                 { time: "19:00", type: "hotel", title: "入住 Holiday Inn Marina", desc: "Marina 附近用餐。", location: "189 Seaside Cir, Marina, CA 93933", image: null, tags: [{text: "已訂", type: "info"}] }
                             ] 
                         },
                         { 
-                            day: 5, date: "2/16 (一)", lat: 36.2704, lon: -121.8081, weather: "載入中...", weatherCode: 0, // Big Sur
+                            day: 5, date: "2/16 (一)", lat: 36.2704, lon: -121.8081, weather: "載入中...", weatherCode: 0,
                             items: [
                                 { time: "09:00", type: "attraction", title: "Big Sur 精華", desc: "Bixby Bridge, McWay Falls。", location: "Bixby Creek Bridge", image: "https://images.unsplash.com/photo-1473442240418-452f03b7ae40?w=800", tags: [{text: "絕景", type: "info"}] },
                                 { time: "14:30", type: "transport", title: "返回 SFO 還車", desc: "18:30 前需還車。SFO Rental Car Center。", location: "SFO Rental Car Center", image: "https://images.unsplash.com/photo-1620573966024-e223018889a7?w=800", tags: [{text: "加滿油", type: "important"}] },
@@ -157,7 +159,7 @@
                             ] 
                         },
                         { 
-                            day: 6, date: "2/17 (二)", lat: 36.1699, lon: -115.1398, weather: "載入中...", weatherCode: 0, // LV
+                            day: 6, date: "2/17 (二)", lat: 36.1699, lon: -115.1398, weather: "載入中...", weatherCode: 0,
                             items: [
                                 { time: "10:00", type: "attraction", title: "賭城大道 Strip", desc: "Venetian, Caesars, Cosmopolitan。", location: "Las Vegas Strip", image: "https://images.unsplash.com/photo-1605833556294-ea5c7a74f57d?w=800", tags: [{text: "不開車", type: "info"}] },
                                 { time: "15:00", type: "attraction", title: "Bellagio 水舞", desc: "白天與夜晚不同風情。", location: "Bellagio Hotel & Casino", image: "https://images.unsplash.com/photo-1534069352613-5a022513f56b?w=800", tags: [] },
@@ -165,7 +167,7 @@
                             ] 
                         },
                         { 
-                            day: 7, date: "2/18 (三)", lat: 36.43, lon: -114.51, weather: "載入中...", weatherCode: 0, // Valley of Fire (approx)
+                            day: 7, date: "2/18 (三)", lat: 36.43, lon: -114.51, weather: "載入中...", weatherCode: 0,
                             items: [
                                 { time: "09:00", type: "transport", title: "LV 取車 -> Hoover Dam", desc: "上午取車。前往胡佛水壩。", location: "Hoover Dam", image: "https://images.unsplash.com/photo-1527664562450-482d8c39e247?w=800", tags: [{text: "租車", type: "important"}] },
                                 { time: "13:00", type: "attraction", title: "Valley of Fire", desc: "火焰谷：Elephant Rock, Fire Wave。", location: "Valley of Fire State Park", image: "https://images.unsplash.com/photo-1532938833973-1d019f2a99c9?w=800", tags: [{text: "帶水", type: "important"}] },
@@ -173,7 +175,7 @@
                             ] 
                         },
                         { 
-                            day: 8, date: "2/19 (四)", lat: 36.13, lon: -115.42, weather: "載入中...", weatherCode: 0, // Red Rock
+                            day: 8, date: "2/19 (四)", lat: 36.13, lon: -115.42, weather: "載入中...", weatherCode: 0,
                             items: [
                                 { time: "09:00", type: "attraction", title: "Red Rock Canyon", desc: "Scenic Drive。", location: "Red Rock Canyon National Conservation Area", image: "https://images.unsplash.com/photo-1493243350443-9e3048ce7288?w=800", tags: [] },
                                 { time: "14:30", type: "transport", title: "前往 Los Angeles", desc: "中途可停 Barstow Outlets。", location: "Outlets at Barstow", image: "https://images.unsplash.com/photo-1502672023488-70e25813eb80?w=800", tags: [{text: "長途車", type: "info"}] },
@@ -181,7 +183,7 @@
                             ] 
                         },
                         { 
-                            day: 9, date: "2/20 (五)", lat: 34.0522, lon: -118.2437, weather: "載入中...", weatherCode: 0, // LA
+                            day: 9, date: "2/20 (五)", lat: 34.0522, lon: -118.2437, weather: "載入中...", weatherCode: 0,
                             items: [
                                 { time: "10:00", type: "attraction", title: "Griffith Observatory", desc: "眺望好萊塢標誌。", location: "Griffith Observatory", image: "https://images.unsplash.com/photo-1533036814777-6d6a894a4751?w=800", tags: [] },
                                 { time: "14:00", type: "attraction", title: "好萊塢 / The Grove", desc: "星光大道、農夫市集。", location: "Hollywood Walk of Fame", image: "https://images.unsplash.com/photo-1533758362483-e883833d7b00?w=800", tags: [] },
@@ -189,7 +191,7 @@
                             ] 
                         },
                         { 
-                            day: 10, date: "2/21 (六)", lat: 34.0522, lon: -118.2437, weather: "載入中...", weatherCode: 0, // LA
+                            day: 10, date: "2/21 (六)", lat: 34.0522, lon: -118.2437, weather: "載入中...", weatherCode: 0,
                             items: [
                                 { time: "10:00", type: "attraction", title: "LA 自由活動", desc: "最後採買。", location: "Los Angeles", image: "https://images.unsplash.com/photo-1622572166565-5c1a16624997?w=800", tags: [] },
                                 { time: "19:00", type: "transport", title: "LAX 機場還車", desc: "前往機場，預留時間還車。", location: "LAX Rental Car Return", image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800", tags: [{text: "加滿油", type: "important"}] },
@@ -211,7 +213,6 @@
                     return 'text-jp-accent bg-blue-50';
                 },
                 getWeatherIcon(code) {
-                    // Open-Meteo WMO Code 轉換
                     if (code === 0) return 'fa-sun';
                     if (code >= 1 && code <= 3) return 'fa-cloud-sun';
                     if (code >= 45 && code <= 48) return 'fa-smog';
@@ -226,19 +227,15 @@
                 removeExpense(i) { this.expenses.splice(i, 1); this.save(); },
                 save() { localStorage.setItem('us_trip_exp', JSON.stringify(this.expenses)); },
                 
-                // 核心功能：抓取即時天氣
                 async fetchRealTimeWeather() {
                     this.loadingWeather = true;
-                    // 使用 Open-Meteo API
                     const promises = this.itinerary.map(async (day, index) => {
                         try {
-                            // 抓取「當下」的即時天氣 (因為 2026 還太遠)
                             const url = `https://api.open-meteo.com/v1/forecast?latitude=${day.lat}&longitude=${day.lon}&current_weather=true&timezone=America%2FLos_Angeles`;
                             const res = await fetch(url);
                             const data = await res.json();
                             
                             if (data.current_weather) {
-                                // 更新資料
                                 this.itinerary[index].weather = `${data.current_weather.temperature}°C`;
                                 this.itinerary[index].weatherCode = data.current_weather.weathercode;
                             }
@@ -255,8 +252,6 @@
             mounted() { 
                 const saved = localStorage.getItem('us_trip_exp'); 
                 if (saved) this.expenses = JSON.parse(saved); 
-                
-                // 啟動抓取天氣
                 this.fetchRealTimeWeather();
             }
         }).mount('#app');
