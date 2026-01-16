@@ -4,132 +4,73 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>美國行🇺🇸2026</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png.PNG">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700&family=Noto+Sans+TC:wght@300;400;500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@700&family=Noto+Sans+TC:wght@400;500&display=swap" rel="stylesheet">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { 'jp-bg': '#F4F4F0', 'jp-card': '#FFFFFF', 'jp-text': '#2B2B2B', 'jp-accent': '#2F5D62', 'jp-sub': '#8A8A8A', 'tag-food': '#D66A59', 'tag-buy': '#E5B350' },
+                    colors: { 'jp-bg': '#F4F4F0', 'jp-card': '#FFFFFF', 'jp-text': '#2B2B2B', 'jp-accent': '#2F5D62', 'jp-sub': '#8A8A8A' },
                     fontFamily: { 'serif': ['"Noto Serif TC"', 'serif'], 'sans': ['"Noto Sans TC"', 'sans-serif'] }
                 }
             }
         }
     </script>
     <style>
-        body { background-color: #F4F4F0; font-family: 'Noto Sans TC', sans-serif; -webkit-tap-highlight-color: transparent; }
-        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        body { background-color: #F4F4F0; font-family: 'Noto Sans TC', sans-serif; }
         .ios-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
-        .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="text-jp-text h-screen flex flex-col overflow-hidden">
     <div id="app" class="flex flex-col h-full">
         <header class="bg-jp-bg px-6 pt-12 pb-4 flex justify-between items-end shrink-0">
-            <div><p class="text-sm text-jp-sub tracking-widest mb-1">TRAVEL ITINERARY</p><h1 class="text-3xl font-serif font-bold text-jp-accent">美國漫遊 2026</h1></div>
-            <div class="text-right"><div class="text-xs text-jp-sub">Today</div><div class="text-xl font-bold font-serif">{{ currentDateDisplay }}</div></div>
+            <div>
+                <p class="text-xs text-jp-sub tracking-widest mb-1 uppercase">Trip Ledger</p>
+                <h1 class="text-3xl font-serif font-bold text-jp-accent">美國漫遊 2026</h1>
+            </div>
+            <div class="text-right">
+                <div class="text-xl font-bold font-serif">{{ itinerary[activeDayIndex].date.split(' ')[0] }}</div>
+            </div>
         </header>
 
         <main class="flex-1 overflow-y-auto px-4 pb-24 hide-scrollbar">
-            <div v-if="currentTab === 'trip'" class="space-y-6">
-                <div class="flex space-x-3 overflow-x-auto pb-2 hide-scrollbar">
-                    <button v-for="(day, index) in itinerary" :key="index" @click="activeDayIndex = index" :class="activeDayIndex === index ? 'bg-jp-accent text-white shadow-lg' : 'bg-white text-jp-sub'" class="flex-shrink-0 px-4 py-2 rounded-full text-sm font-medium transition-all duration-300">D{{ day.day }}</button>
-                </div>
-
-                <div v-if="itinerary[activeDayIndex]" class="animate-fade-in">
-                    <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-xl font-bold font-serif">{{ itinerary[activeDayIndex].date }}</h2>
-                        <div class="flex items-center text-sm text-jp-sub bg-white px-3 py-1 rounded-full shadow-sm">
-                            <i v-if="loadingWeather" class="fa-solid fa-spinner fa-spin mr-2 text-jp-accent"></i>
-                            <i v-else class="mr-2 text-jp-accent" :class="getWeatherIcon(itinerary[activeDayIndex].weatherCode)"></i>
-                            <span>{{ itinerary[activeDayIndex].weather }}</span>
-                        </div>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div v-for="(item, i) in itinerary[activeDayIndex].items" :key="i" class="bg-jp-card rounded-2xl ios-shadow relative overflow-hidden">
-                            <div v-if="item.image" class="h-40 w-full overflow-hidden">
-                                <img :src="item.image" class="w-full h-full object-cover" alt="spot">
-                            </div>
-                            <div class="p-5 relative">
-                                <div class="absolute top-5 right-5 opacity-20"><i :class="getIcon(item.type, item.title)" class="text-4xl text-jp-accent"></i></div>
-                                <span class="text-xs font-bold tracking-widest uppercase text-jp-sub mb-1 block">{{ item.time }} | {{ item.type }}</span>
-                                <h3 class="text-lg font-bold mb-1">{{ item.title }}</h3>
-                                <p class="text-sm text-gray-500 mb-3 whitespace-pre-line leading-relaxed">{{ item.desc }}</p>
-                                <div class="flex flex-wrap gap-2 mb-4" v-if="item.tags">
-                                    <span v-for="tag in item.tags" :class="getTagClass(tag.type)" class="text-xs px-2 py-1 rounded border border-opacity-20 font-medium">
-                                        {{ tag.text }}
-                                    </span>
-                                </div>
-                                <button @click="openMap(item.location)" class="w-full bg-jp-accent text-white py-2 rounded-xl text-sm flex items-center justify-center active:scale-95 transition-transform">
-                                    <i class="fa-solid fa-location-arrow mr-2"></i> 導航
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            <div class="flex space-x-3 overflow-x-auto pb-4 hide-scrollbar">
+                <button v-for="(day, index) in itinerary" :key="index" 
+                    @click="activeDayIndex = index"
+                    :class="activeDayIndex === index ? 'bg-jp-accent text-white shadow-lg' : 'bg-white text-jp-sub'"
+                    class="flex-shrink-0 px-5 py-2 rounded-full text-sm font-medium transition-all">
+                    D{{ day.day }}
+                </button>
             </div>
 
-            <div v-if="currentTab === 'info'" class="space-y-4">
-                <h2 class="text-xl font-serif font-bold mb-4">旅程資料夾</h2>
-                <div class="bg-gray-800 text-white p-5 rounded-2xl ios-shadow relative overflow-hidden">
-                    <h3 class="font-bold text-lg mb-3"><i class="fa-solid fa-car-side mr-2"></i>租車詳情 (Thrifty)</h3>
-                    <div class="text-sm space-y-2 text-gray-300">
-                        <p><span class="text-gray-400">取車:</span> 2/14 09:00 @ 364 O’Farrell St</p>
-                        <p><span class="text-gray-400">還車:</span> 2/16 18:30 @ SFO Rental Center</p>
-                        <p><span class="text-gray-400">車型:</span> Genesis G70 / Premium</p>
+            <div v-if="itinerary[activeDayIndex]" class="space-y-4">
+                <div v-for="(item, i) in itinerary[activeDayIndex].items" :key="i" 
+                    class="bg-jp-card rounded-2xl p-5 ios-shadow border-l-4"
+                    :class="item.type === 'hotel' ? 'border-amber-400' : 'border-jp-accent'">
+                    
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] font-bold tracking-tighter text-jp-sub uppercase">
+                            {{ item.time }} • {{ item.type === 'hotel' ? '住宿' : '活動' }}
+                        </span>
+                        <i :class="getIcon(item.type)" class="text-jp-accent opacity-30 text-xl"></i>
                     </div>
+                    
+                    <h3 class="text-lg font-bold mb-1">{{ item.title }}</h3>
+                    <p class="text-sm text-gray-500 whitespace-pre-line leading-relaxed mb-4">{{ item.desc }}</p>
+                    
+                    <button @click="openMap(item.location)" class="w-full bg-gray-50 text-jp-accent py-2.5 rounded-xl text-xs font-bold flex items-center justify-center border border-gray-100 active:bg-gray-200 transition-colors">
+                        <i class="fa-solid fa-location-dot mr-2"></i> {{ item.location }}
+                    </button>
                 </div>
-                <div class="bg-jp-card p-5 rounded-2xl ios-shadow border-l-4 border-jp-accent">
-                    <h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-plane-departure mr-2"></i>航班備忘</h3>
-                    <div class="text-sm space-y-2 text-gray-600">
-                        <p><strong>去程 (2/12):</strong> JX012 / BR028</p>
-                        <p><strong>內陸 (2/16):</strong> SFO ✈ LAS (晚上)</p>
-                        <p><strong>回程 (2/21):</strong> JX001 / BR015 (22:50)</p>
-                    </div>
-                </div>
-                <div class="bg-white p-5 rounded-2xl ios-shadow">
-                    <h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-bed mr-2"></i>住宿清單</h3>
-                    <div class="text-xs space-y-2 text-gray-500">
-                        <p>2/12-2/13: Found Hotel Carlton</p>
-                        <p>2/14: Crowne Plaza SFO Airport</p>
-                        <p>2/15: Holiday Inn Express Marina</p>
-                        <p>2/16-2/17: Jockey Club Las Vegas</p>
-                        <p>2/18: Holiday Inn Express Henderson</p>
-                        <p>2/19-2/20: Hotel Burbank</p>
-                    </div>
-                </div>
-            </div>
-
-            <div v-if="currentTab === 'wallet'" class="space-y-4">
-                 <div class="bg-jp-accent text-white p-6 rounded-2xl shadow-lg">
-                    <p class="text-blue-100 text-sm">總支出 (USD)</p>
-                    <p class="text-4xl font-serif font-bold mt-1">${{ totalExpense.toLocaleString() }}</p>
-                 </div>
-                 <div class="mt-4 flex space-x-2">
-                    <input v-model="newExpenseName" type="text" placeholder="項目" class="w-1/2 p-2 rounded border">
-                    <input v-model.number="newExpenseAmount" type="number" placeholder="$" class="w-1/4 p-2 rounded border">
-                    <button @click="addExpense" class="bg-jp-accent text-white px-4 rounded">+</button>
-                 </div>
-                 <div class="space-y-2 mt-4">
-                    <div v-for="(exp, index) in expenses" :key="index" class="bg-white p-3 rounded-xl flex justify-between ios-shadow text-sm">
-                        <span>{{ exp.name }}</span>
-                        <span class="font-bold text-jp-accent">${{ exp.amount }}</span>
-                    </div>
-                 </div>
             </div>
         </main>
 
-        <nav class="bg-white border-t flex justify-around items-center h-[80px] shrink-0 safe-bottom">
-            <button @click="currentTab = 'trip'" :class="currentTab === 'trip' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3"><i class="fa-solid fa-map text-xl"></i><span class="text-[10px]">行程</span></button>
-            <button @click="currentTab = 'info'" :class="currentTab === 'info' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3"><i class="fa-solid fa-suitcase text-xl"></i><span class="text-[10px]">資訊</span></button>
-            <button @click="currentTab = 'wallet'" :class="currentTab === 'wallet' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3"><i class="fa-solid fa-wallet text-xl"></i><span class="text-[10px]">記帳</span></button>
+        <nav class="bg-white border-t flex justify-around items-center h-[85px] shrink-0 pb-6">
+            <button class="text-jp-accent flex flex-col items-center"><i class="fa-solid fa-map-location-dot text-xl"></i><span class="text-[10px] mt-1">行程詳情</span></button>
+            <button @click="activeDayIndex = 0" class="text-gray-300 flex flex-col items-center"><i class="fa-solid fa-calendar-day text-xl"></i><span class="text-[10px] mt-1">回到第一天</span></button>
         </nav>
     </div>
 
@@ -138,101 +79,59 @@
         createApp({
             data() {
                 return {
-                    currentTab: 'trip', 
                     activeDayIndex: 0,
-                    loadingWeather: false,
-                    newExpenseName: '',
-                    newExpenseAmount: null,
-                    expenses: [],
                     itinerary: [
-                        { day: 1, date: "2/12 (四)", lat: 37.7749, lon: -122.4194, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "航班", type: "transport", title: "抵達舊金山 SFO", desc: "JX012 / BR028 抵達。\n搭 BART / Uber 前往市區。", location: "SFO Airport", image: "https://images.unsplash.com/photo-1436491865332-7a61a109cc05?w=800", tags: [{text: "此日不租車", type: "info"}] },
-                            { time: "住宿", type: "hotel", title: "Found Hotel Carlton", desc: "Nob Hill 區，2晚。", location: "Found Hotel Carlton", tags: [{text: "2/12-2/13", type: "info"}] }
+                        { day: 1, date: "2/12 (四)", items: [
+                            { time: "ARRIVE", type: "transport", title: "抵達舊金山 SFO", desc: "入境後搭 BART 或 Uber 前往市區調整時差。", location: "San Francisco International Airport" },
+                            { time: "STAY", type: "hotel", title: "Found Hotel Carlton", desc: "入住 Nob Hill 飯店（2/12–2/13）", location: "1075 Sutter St, San Francisco, CA 94109" }
                         ]},
-                        { day: 2, date: "2/13 (五)", lat: 37.7749, lon: -122.4194, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "舊金山市區觀光", desc: "叮噹車、九曲花街、漁人碼頭 Pier 39 海獅。\n傍晚：金門大橋攝影。", location: "Lombard Street", image: "https://images.unsplash.com/photo-1521464302861-ce943915d1c3?w=800", tags: [{text: "惡魔島需訂票", type: "important"}] },
-                            { time: "住宿", type: "hotel", title: "Found Hotel Carlton", desc: "續住 Nob Hill。", location: "Found Hotel Carlton" }
+                        { day: 2, date: "2/13 (五)", items: [
+                            { time: "CITY", type: "attraction", title: "舊金山市區觀光", desc: "叮噹車、九曲花街、漁人碼頭、金門大橋。", location: "Pier 39, San Francisco" },
+                            { time: "STAY", type: "hotel", title: "Found Hotel Carlton", desc: "續住舊金山市區。", location: "1075 Sutter St, San Francisco, CA 94109" }
                         ]},
-                        { day: 3, date: "2/14 (六)", lat: 38.2975, lon: -122.2869, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "09:00", type: "transport", title: "租車開始 (Thrifty)", desc: "取車：364 O’Farrell St\n車型：Genesis G70 (Premium)", location: "364 O’Farrell St", image: "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800", tags: [{text: "帶台灣駕照+IDP", type: "important"}] },
-                            { time: "行程", type: "attraction", title: "Napa Valley", desc: "酒莊參觀品酒。傍晚回機場所在地。", location: "Napa Valley", image: "https://images.unsplash.com/photo-1589309083321-7279318b859e?w=800", tags: [{text: "喝酒不開車", type: "important"}] },
-                            { time: "住宿", type: "hotel", title: "Crowne Plaza SFO Airport", desc: "機場附近，方便隔日移動。", location: "Crowne Plaza San Francisco Airport" }
+                        { day: 3, date: "2/14 (六)", items: [
+                            { time: "09:00", type: "transport", title: "租車：Napa Valley", desc: "364 O’Farrell St 取車。酒莊品酒。", location: "364 O'Farrell St, San Francisco" },
+                            { time: "STAY", type: "hotel", title: "Crowne Plaza SF Airport", desc: "返回灣區機場附近入住。", location: "1177 Airport Blvd, Burlingame, CA 94010" }
                         ]},
-                        { day: 4, date: "2/15 (日)", lat: 36.6002, lon: -121.8947, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "Monterey / 17-Mile Drive", desc: "Lone Cypress、海邊散步。", location: "17-Mile Drive", image: "https://images.unsplash.com/photo-1534051390463-25574044b7d1?w=800" },
-                            { time: "住宿", type: "hotel", title: "Holiday Inn Express Marina", desc: "State Beach Area。", location: "Holiday Inn Express & Suites Marina" }
+                        { day: 4, date: "2/15 (日)", items: [
+                            { time: "COAST", type: "attraction", title: "Monterey / 17-Mile Drive", desc: "海岸散步、Lone Cypress 攝影。", location: "17 Mile Dr, Pebble Beach, CA" },
+                            { time: "STAY", type: "hotel", title: "Holiday Inn Express Marina", desc: "入住 Marina - State Beach Area。", location: "189 Seaside Cir, Marina, CA 93933" }
                         ]},
-                        { day: 5, date: "2/16 (一)", lat: 36.3582, lon: -121.9029, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "Big Sur 壯闊海岸", desc: "Bixby Bridge、McWay Falls。\n下午開回 SFO。", location: "Bixby Creek Bridge", image: "https://images.unsplash.com/photo-1517416955375-d1484b3977c7?w=800" },
-                            { time: "18:30", type: "transport", title: "還車 & 內陸機", desc: "還車：SFO Rental Center。\n隨後飛往拉斯維加斯。", location: "SFO Rental Car Center", tags: [{text: "準時還車", type: "important"}] },
-                            { time: "住宿", type: "hotel", title: "Jockey Club Las Vegas", desc: "Strip 大道中心位置。", location: "Jockey Club Las Vegas", tags: [{text: "2/16-2/18", type: "info"}] }
+                        { day: 5, date: "2/16 (一)", items: [
+                            { time: "18:30", type: "transport", title: "還車 ✈ 拉斯維加斯", desc: "SFO 還車後搭乘內陸航班前往 Las Vegas。", location: "SFO Rental Car Center" },
+                            { time: "STAY", type: "hotel", title: "Jockey Club Las Vegas", desc: "入住大道中心飯店（2/16–2/18）", location: "3700 S Las Vegas Blvd, Las Vegas, NV 89109" }
                         ]},
-                        { day: 6, date: "2/17 (二)", lat: 36.1699, lon: -115.1398, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "Las Vegas Strip", desc: "Bellagio 噴泉、凱薩宮。\n盡情享受賭城不夜城。", location: "Las Vegas Strip", image: "https://images.unsplash.com/photo-1546255793-1996726c5471?w=800" },
-                            { time: "住宿", type: "hotel", title: "Jockey Club", desc: "續住拉斯維加斯。", location: "Jockey Club Las Vegas" }
+                        { day: 6, date: "2/17 (二)", items: [
+                            { time: "STRIP", type: "attraction", title: "Las Vegas 市區", desc: "百樂宮噴泉、凱薩宮、Strip 大道。", location: "Bellagio Fountain, Las Vegas" },
+                            { time: "STAY", type: "hotel", title: "Jockey Club Las Vegas", desc: "續住拉斯維加斯。", location: "3700 S Las Vegas Blvd, Las Vegas, NV 89109" }
                         ]},
-                        { day: 7, date: "2/18 (三)", lat: 35.9788, lon: -114.9817, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "胡佛水壩 / 火焰谷", desc: "Hoover Dam、Lake Mead、Valley of Fire。", location: "Hoover Dam", image: "https://images.unsplash.com/photo-1527664562450-482d8c39e247?w=800" },
-                            { time: "住宿", type: "hotel", title: "Holiday Inn Express Henderson", desc: "Henderson South / Boulder City。", location: "Holiday Inn Express Henderson South" }
+                        { day: 7, date: "2/18 (三)", items: [
+                            { time: "PARK", type: "attraction", title: "Hoover Dam / Valley of Fire", desc: "參觀胡佛水壩與火焰谷紅岩。", location: "Valley of Fire State Park" },
+                            { time: "STAY", type: "hotel", title: "Holiday Inn Express Henderson", desc: "入住 Henderson / Boulder City 區域。", location: "1553 N Boulder Hwy, Henderson, NV 89011" }
                         ]},
-                        { day: 8, date: "2/19 (四)", lat: 34.1808, lon: -118.3089, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "Red Rock Canyon / LA", desc: "紅岩峽谷、Mount Charleston 中停。\n下午開往 LA。", location: "Red Rock Canyon", image: "https://images.unsplash.com/photo-1493243350443-9e3048ce7288?w=800", tags: [{text: "4.5hr 車程", type: "info"}] },
-                            { time: "住宿", type: "hotel", title: "Hotel Burbank", desc: "Burbank 區，2晚。", location: "Hotel Burbank", tags: [{text: "2/19-2/20", type: "info"}] }
+                        { day: 8, date: "2/19 (四)", items: [
+                            { time: "DRIVE", type: "transport", title: "開往洛杉磯 (LA)", desc: "途經 Red Rock Canyon、Mount Charleston。", location: "Red Rock Canyon National Conservation Area" },
+                            { time: "STAY", type: "hotel", title: "Hotel Burbank", desc: "入住洛杉磯 Burbank（2/19–2/20）", location: "150 E Angeleno Ave, Burbank, CA 91502" }
                         ]},
-                        { day: 9, date: "2/20 (五)", lat: 34.0522, lon: -118.2437, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "美食", type: "food", title: "Ahgassi Gopchang", desc: "韓式烤腸。Pasadena 自由活動。", location: "Ahgassi Gopchang", image: "https://images.unsplash.com/photo-1593026330050-8b0126a310c1?w=800" },
-                            { time: "住宿", type: "hotel", title: "Hotel Burbank", desc: "續住 Burbank。", location: "Hotel Burbank" }
+                        { day: 9, date: "2/20 (五)", items: [
+                            { time: "FOOD", type: "food", title: "LA 東側行程 & 烤腸", desc: "Pasadena 觀光、Ahgassi Gopchang 晚餐。", location: "Ahgassi Gopchang, Los Angeles" },
+                            { time: "STAY", type: "hotel", title: "Hotel Burbank", desc: "續住 Burbank。", location: "150 E Angeleno Ave, Burbank, CA 91502" }
                         ]},
-                        { day: 10, date: "2/21 (六)", lat: 33.9416, lon: -118.4085, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "洛杉磯經典標誌", desc: "Hollywood Sign、Urban Light、The Grove。", location: "Griffith Observatory", image: "https://images.unsplash.com/photo-1540939369344-966953e20d29?w=800" },
-                            { time: "航班", type: "transport", title: "搭機返台", desc: "22:50 JX001 / BR015 班機返台。", location: "LAX Airport", tags: [{text: "22:50 起飛", type: "important"}] }
+                        { day: 10, date: "2/21 (六)", items: [
+                            { time: "LAST", type: "attraction", title: "LA 市區 ✈ 回程", desc: "Hollywood Sign、Urban Light。晚間前往機場。", location: "LAX Airport" },
+                            { time: "FLY", type: "transport", title: "JX001 / BR015", desc: "帶著滿滿回憶搭機返台。", location: "Tom Bradley International Terminal" }
                         ]}
                     ]
                 }
             },
-            computed: {
-                currentDateDisplay() { return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); },
-                totalExpense() { return this.expenses.reduce((sum, item) => sum + item.amount, 0); }
-            },
             methods: {
-                getIcon(type, title) {
-                    const t = title.toLowerCase();
-                    if (t.includes('outlet') || t.includes('採購')) return 'fa-solid fa-bag-shopping';
-                    const icons = { 'transport': 'fa-solid fa-car', 'food': 'fa-solid fa-utensils', 'attraction': 'fa-solid fa-camera', 'hotel': 'fa-solid fa-bed' };
-                    return icons[type] || 'fa-solid fa-circle';
+                getIcon(type) {
+                    const icons = { 'transport': 'fa-solid fa-car', 'hotel': 'fa-solid fa-bed', 'attraction': 'fa-solid fa-camera', 'food': 'fa-solid fa-utensils' };
+                    return icons[type] || 'fa-solid fa-map-pin';
                 },
-                getTagClass(type) {
-                    return type === 'important' ? 'text-white bg-tag-food' : 'text-jp-accent bg-blue-50';
-                },
-                getWeatherIcon(code) {
-                    if (code === 0) return 'fa-solid fa-sun';
-                    if (code >= 1 && code <= 3) return 'fa-solid fa-cloud-sun';
-                    return 'fa-solid fa-cloud';
-                },
-                openMap(loc) { if(loc) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'); },
-                addExpense() { if (this.newExpenseName && this.newExpenseAmount) { this.expenses.unshift({ name: this.newExpenseName, amount: this.newExpenseAmount }); this.newExpenseName = ''; this.newExpenseAmount = null; this.save(); } },
-                save() { localStorage.setItem('us_trip_exp', JSON.stringify(this.expenses)); },
-                async fetchRealTimeWeather() {
-                    this.loadingWeather = true;
-                    const promises = this.itinerary.map(async (day, index) => {
-                        try {
-                            const url = `https://api.open-meteo.com/v1/forecast?latitude=${day.lat}&longitude=${day.lon}&current_weather=true&timezone=America%2FLos_Angeles`;
-                            const res = await fetch(url);
-                            const data = await res.json();
-                            if (data.current_weather) {
-                                this.itinerary[index].weather = `${Math.round(data.current_weather.temperature)}°C`;
-                                this.itinerary[index].weatherCode = data.current_weather.weathercode;
-                            }
-                        } catch (e) { this.itinerary[index].weather = "N/A"; }
-                    });
-                    await Promise.all(promises);
-                    this.loadingWeather = false;
+                openMap(loc) {
+                    window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank');
                 }
-            },
-            mounted() { 
-                const saved = localStorage.getItem('us_trip_exp'); 
-                if (saved) this.expenses = JSON.parse(saved); 
-                this.fetchRealTimeWeather();
             }
         }).mount('#app');
     </script>
