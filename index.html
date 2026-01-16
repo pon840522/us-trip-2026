@@ -29,13 +29,14 @@
         .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
         .snap-x { scroll-snap-type: x mandatory; }
         .snap-center { scroll-snap-align: center; }
+        .weather-badge { transition: all 0.5s ease; }
     </style>
 </head>
 <body class="text-jp-text h-screen flex flex-col overflow-hidden">
     <div id="app" class="flex flex-col h-full">
         <header class="bg-jp-bg px-6 pt-12 pb-4 flex justify-between items-end shrink-0">
             <div><p class="text-sm text-jp-sub tracking-widest mb-1">TRAVEL ITINERARY</p><h1 class="text-3xl font-serif font-bold text-jp-accent">美國行 2026</h1></div>
-            <div class="text-right"><div class="text-xs text-jp-sub">Today</div><div class="text-xl font-bold font-serif">{{ currentDate }}</div></div>
+            <div class="text-right"><div class="text-xs text-jp-sub">Today</div><div class="text-xl font-bold font-serif">{{ currentDateDisplay }}</div></div>
         </header>
 
         <main class="flex-1 overflow-y-auto px-4 pb-24 hide-scrollbar">
@@ -68,24 +69,21 @@
                             </div>
 
                             <div class="p-5 relative">
-                                <div class="absolute top-5 right-5 opacity-20"><i :class="getIcon(item.type, item.title)" class="text-4xl text-jp-accent"></i></div>
+                                <div class="absolute top-5 right-5 opacity-20">
+                                    <i :class="getIcon(item.type, item.title)" class="text-4xl text-jp-accent"></i>
+                                </div>
                                 <span class="text-xs font-bold tracking-widest uppercase text-jp-sub mb-1 block">{{ item.time }} | {{ item.type }}</span>
                                 <h3 class="text-lg font-bold mb-1">{{ item.title }}</h3>
                                 <p class="text-sm text-gray-500 mb-3 whitespace-pre-line">{{ item.desc }}</p>
-                                <div class="flex flex-wrap gap-2 mb-4" v-if="item.tags"><span v-for="tag in item.tags" :class="getTagClass(tag.type)" class="text-xs px-2 py-1 rounded border border-opacity-20 font-medium">{{ tag.text }}</span></div>
-                                <button @click="openMap(item.location)" class="w-full bg-jp-accent text-white py-2.5 rounded-xl text-sm flex items-center justify-center active:scale-95 transition-transform"><i class="fa-solid fa-location-arrow mr-2"></i> 導航</button>
+                                <div class="flex flex-wrap gap-2 mb-4" v-if="item.tags">
+                                    <span v-for="tag in item.tags" :class="getTagClass(tag.type)" class="text-xs px-2 py-1 rounded border border-opacity-20 font-medium">{{ tag.text }}</span>
+                                </div>
+                                <button @click="openMap(item.location)" class="w-full bg-jp-accent text-white py-2.5 rounded-xl text-sm flex items-center justify-center active:scale-95 transition-transform">
+                                    <i class="fa-solid fa-location-arrow mr-2"></i> 導航
+                                </button>
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            
-            <div v-if="currentTab === 'info'" class="space-y-4">
-                <h2 class="text-xl font-serif font-bold mb-4">旅程資料夾</h2>
-                <div class="bg-gray-800 text-white p-5 rounded-2xl ios-shadow">
-                    <h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-car-side mr-2"></i>租車資訊 (SF)</h3>
-                    <p class="text-sm text-gray-300">Thrifty | Genesis G70 (Premium)</p>
-                    <p class="text-sm text-gray-300">取車：2/14 09:00 @ 364 O’Farrell St</p>
                 </div>
             </div>
         </main>
@@ -111,52 +109,77 @@
                             { time: "21:30", type: "hotel", title: "Found Hotel Carlton", desc: "抵達後入住飯店、調時差。\nUnion Square 簡單覓食。", images: ["https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?w=800"], location: "545 Jones St, San Francisco" }
                         ]},
                         { day: 2, date: "2/13 (五)", lat: 37.7749, lon: -122.4194, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "09:00", type: "attraction", title: "市區經典巡禮", desc: "．Powell St 叮噹車\n．Lombard Street (九曲花街)\n．漁人碼頭 & Pier 39 (海獅)\n．傍晚可看金門大橋", images: ["https://images.unsplash.com/photo-1541460601340-7dd7c3a07246?w=800"], location: "Lombard Street" }
+                            { time: "09:00", type: "attraction", title: "舊金山市區", desc: "．Powell St 叮噹車\n．Lombard Street (九曲花街)\n．漁人碼頭 & Pier 39 (海獅)\n．金門大橋", images: ["https://images.unsplash.com/photo-1541460601340-7dd7c3a07246?w=800"], location: "Lombard Street" }
                         ]},
                         { day: 3, date: "2/14 (六)", lat: 38.2975, lon: -122.2869, weather: "載入中...", weatherCode: 0, items: [
                             { time: "09:00", type: "transport", title: "Thrifty 取車", desc: "地點：364 O’Farrell St\n車型：Genesis G70 (Premium)", images: ["https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?w=800"], location: "364 O'Farrell St, San Francisco" },
-                            { time: "11:00", type: "attraction", title: "Napa Valley", desc: "酒莊 1–2 間 (需預約)。\n注意：有喝酒請指定駕駛！", images: ["https://images.unsplash.com/photo-1589309083321-7279318b859e?w=800"], location: "Napa Valley" },
-                            { time: "20:00", type: "hotel", title: "Crowne Plaza SFO", desc: "往機場方向移動入住。", images: ["https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800"], location: "1177 Airport Blvd, Burlingame" }
+                            { time: "11:00", type: "attraction", title: "Napa Valley", desc: "酒莊 1–2 間 (需預約)。\n注意：有喝酒請指定駕駛！", images: ["https://images.unsplash.com/photo-1589309083321-7279318b859e?w=800"], location: "Napa Valley" }
                         ]},
                         { day: 4, date: "2/15 (日)", lat: 36.6002, lon: -121.8947, weather: "載入中...", weatherCode: 0, items: [
                             { time: "13:00", type: "attraction", title: "Monterey & 17-Mile Drive", desc: "．17-Mile Drive\n．Lone Cypress\n．Cannery Row 散步", images: ["https://images.unsplash.com/photo-1534051390463-25574044b7d1?w=800"], location: "17 Mile Dr" }
                         ]},
-                        { day: 5, date: "2/16 (一)", lat: 36.1699, lon: -115.1398, weather: "載入中...", weatherCode: 0, items: [
+                        { day: 5, date: "2/16 (一)", lat: 37.7749, lon: -122.4194, weather: "載入中...", weatherCode: 0, items: [
                             { time: "09:00", type: "attraction", title: "Big Sur 精華", desc: "．Bixby Bridge\n．McWay Falls", images: ["https://images.unsplash.com/photo-1517416955375-d1484b3977c7?w=800"], location: "Bixby Creek Bridge" },
                             { time: "18:30", type: "transport", title: "還車 & 飛往 LV", desc: "SFO Rental Car Center 還車。\n搭機前往拉斯維加斯。", images: ["https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?w=800"], location: "SFO Rental Car Center" }
                         ]},
                         { day: 6, date: "2/17 (二)", lat: 36.1699, lon: -115.1398, weather: "載入中...", weatherCode: 0, items: [
                             { time: "14:00", type: "attraction", title: "Las Vegas Strip", desc: "．Bellagio 噴泉水舞\n．Caesars Palace\n．夜拍賭城街景", images: ["https://images.unsplash.com/photo-1546255793-1996726c5471?w=800"], location: "Las Vegas Strip" }
                         ]},
-                        { day: 7, date: "2/18 (三)", lat: 35.9788, lon: -114.9817, weather: "載入中...", weatherCode: 0, items: [
+                        { day: 7, date: "2/18 (三)", lat: 36.1699, lon: -115.1398, weather: "載入中...", weatherCode: 0, items: [
                             { time: "09:00", type: "attraction", title: "Hoover Dam & Valley of Fire", desc: "．胡佛水壩 / 密德湖\n．火焰谷州立公園\n備註：日照強，備水防曬。", images: ["https://images.unsplash.com/photo-1527664562450-482d8c39e247?w=800"], location: "Hoover Dam" }
                         ]},
-                        { day: 8, date: "2/19 (四)", lat: 34.1808, lon: -118.3089, weather: "載入中...", weatherCode: 0, items: [
+                        { day: 8, date: "2/19 (四)", lat: 34.0522, lon: -118.2437, weather: "載入中...", weatherCode: 0, items: [
                             { time: "09:00", type: "attraction", title: "Red Rock Canyon", desc: "紅岩峽谷＋Mount Charleston 短停。", images: ["https://images.unsplash.com/photo-1493243350443-9e3048ce7288?w=800"], location: "Red Rock Canyon" },
                             { time: "14:00", type: "transport", title: "前往洛杉磯", desc: "車程約 4.5–5 小時。", images: ["https://images.unsplash.com/photo-1580655653885-65763b2597d0?w=800"], location: "Los Angeles" }
                         ]},
-                        { day: 9, date: "2/20 (五)", lat: 34.1808, lon: -118.3089, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "10:00", type: "attraction", title: "好萊塢 & 格里斐斯", desc: "．星光大道 (30-45分)\n．Griffith Observatory 看全景", images: ["https://images.unsplash.com/photo-1540939369344-966953e20d29?w=800"], location: "Griffith Observatory" },
-                            { time: "18:00", type: "food", title: "Ahgassi Gopchang", desc: "晚餐：Koreatown 韓國烤腸！\n提醒：請停付費停車場。", images: ["https://images.unsplash.com/photo-1593026330050-8b0126a310c1?w=800"], location: "Ahgassi Gopchang" }
+                        { day: 9, date: "2/20 (五)", lat: 34.0522, lon: -118.2437, weather: "載入中...", weatherCode: 0, items: [
+                            { time: "10:00", type: "attraction", title: "好萊塢 & 格里斐斯", desc: "．星光大道\n．Griffith Observatory 全景\n．Urban Light 拍照", images: ["https://images.unsplash.com/photo-1540939369344-966953e20d29?w=800"], location: "Griffith Observatory" },
+                            { time: "18:00", type: "food", title: "Ahgassi Gopchang", desc: "晚餐：Koreatown 韓國烤腸！", images: ["https://images.unsplash.com/photo-1593026330050-8b0126a310c1?w=800"], location: "Ahgassi Gopchang" }
                         ]},
                         { day: 10, date: "2/21 (六)", lat: 33.9416, lon: -118.4085, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "09:45", type: "attraction", title: "Citadel Outlets", desc: "09:45–14:00 逛街＋午餐。\n15:00 前離開。", images: ["https://images.unsplash.com/photo-1560963689-09332d7dc15d?w=800", "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=800"], location: "Citadel Outlets" },
-                            { time: "19:30", type: "transport", title: "LAX 還車", desc: "✈️ JX001 / BR015 (22:50 起飛)\n抵達機場最安心。", images: ["https://images.unsplash.com/photo-1517330357046-3ab5a5dd42a1?w=800"], location: "LAX Rental Car Return" }
+                            { time: "09:45", type: "attraction", title: "Citadel Outlets", desc: "09:45–14:00 購物行程。\n15:00 前離開前往機場。", images: ["https://images.unsplash.com/photo-1560963689-09332d7dc15d?w=800", "https://images.unsplash.com/photo-1567401893414-76b7b1e5a7a5?w=800"], location: "Citadel Outlets" },
+                            { time: "19:30", type: "transport", title: "LAX 還車", desc: "✈️ JX001 / BR015 (22:50 起飛)", images: ["https://images.unsplash.com/photo-1517330357046-3ab5a5dd42a1?w=800"], location: "LAX Rental Car Return" }
                         ]}
                     ]
                 }
             },
-            computed: { currentDate() { return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); } },
+            computed: { 
+                currentDateDisplay() { return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); }
+            },
             methods: {
                 getIcon(type, title) {
                     if (title.toLowerCase().includes('outlet') || title.includes('買')) return 'fa-solid fa-bag-shopping';
                     const icons = { 'transport': 'fa-solid fa-car', 'food': 'fa-solid fa-utensils', 'attraction': 'fa-solid fa-camera', 'hotel': 'fa-solid fa-bed' };
                     return icons[type] || 'fa-solid fa-circle';
                 },
-                getWeatherIcon(code) { return 'fa-sun'; }, 
                 getTagClass(type) { return 'text-jp-accent bg-blue-50'; },
-                openMap(loc) { if(loc) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'); }
-            }
+                getWeatherIcon(code) {
+                    if (code === 0) return 'fa-solid fa-sun';
+                    if (code >= 1 && code <= 3) return 'fa-solid fa-cloud-sun';
+                    if (code >= 45 && code <= 48) return 'fa-solid fa-smog';
+                    if (code >= 51 && code <= 67) return 'fa-solid fa-cloud-rain';
+                    if (code >= 95) return 'fa-solid fa-bolt';
+                    return 'fa-solid fa-cloud';
+                },
+                openMap(loc) { if(loc) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'); },
+                async fetchWeather() {
+                    this.loadingWeather = true;
+                    try {
+                        const promises = this.itinerary.map(async (day, index) => {
+                            const url = `https://api.open-meteo.com/v1/forecast?latitude=${day.lat}&longitude=${day.lon}&current_weather=true&timezone=America%2FLos_Angeles`;
+                            const res = await fetch(url);
+                            const data = await res.json();
+                            if (data.current_weather) {
+                                this.itinerary[index].weather = `${Math.round(data.current_weather.temperature)}°C`;
+                                this.itinerary[index].weatherCode = data.current_weather.weathercode;
+                            }
+                        });
+                        await Promise.all(promises);
+                    } catch (e) { console.error("Weather error", e); }
+                    this.loadingWeather = false;
+                }
+            },
+            mounted() { this.fetchWeather(); }
         }).mount('#app');
     </script>
 </body>
