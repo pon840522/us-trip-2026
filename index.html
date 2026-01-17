@@ -4,10 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>美國行🇺🇸2026</title>
-    <link rel="manifest" href="manifest.json">
-    <link rel="apple-touch-icon" href="icon.png.PNG">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -67,68 +63,48 @@
                     <div class="space-y-4">
                         <div v-for="(item, i) in itinerary[activeDayIndex].items" :key="i" class="bg-jp-card rounded-2xl ios-shadow relative overflow-hidden">
                             <div v-if="item.image" class="h-40 w-full overflow-hidden">
-                                <img :src="item.image" class="w-full h-full object-cover transform hover:scale-105 transition-transform duration-500" alt="spot">
+                                <img :src="item.image" class="w-full h-full object-cover" alt="spot">
                             </div>
-                            <div class="p-5 relative">
-                                <div class="absolute top-5 right-5 opacity-20">
-                                    <i :class="getIcon(item.type, item.title)" class="text-4xl text-jp-accent"></i>
-                                </div>
+                            <div class="p-5">
                                 <span class="text-xs font-bold tracking-widest uppercase text-jp-sub mb-1 block">{{ item.time }} | {{ item.type }}</span>
                                 <h3 class="text-lg font-bold mb-1">{{ item.title }}</h3>
                                 <p class="text-sm text-gray-500 mb-3 whitespace-pre-line leading-relaxed">{{ item.desc }}</p>
                                 
                                 <div class="flex flex-wrap gap-2 mb-4" v-if="item.tags">
-                                    <span v-for="tag in item.tags" :class="getTagClass(tag.type)" class="text-xs px-2 py-1 rounded border border-opacity-20 font-medium">
+                                    <span v-for="tag in item.tags" :class="getTagClass(tag.type)" class="text-xs px-2 py-1 rounded font-medium">
                                         {{ tag.text }}
                                     </span>
                                 </div>
-                                <div class="flex space-x-3 mt-2">
-                                    <button @click="openMap(item.location)" class="flex-1 bg-jp-accent text-white py-2 rounded-lg text-sm flex items-center justify-center active:scale-95 transition-transform">
-                                        <i class="fa-solid fa-location-arrow mr-2"></i> 導航
-                                    </button>
-                                </div>
+                                <button @click="openMap(item.location)" class="w-full bg-jp-accent text-white py-2 rounded-lg text-sm flex items-center justify-center">
+                                    <i class="fa-solid fa-location-arrow mr-2"></i> 導航
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div v-if="currentTab === 'info'" class="space-y-4 animate-fade-in">
-                <h2 class="text-xl font-serif font-bold mb-4">旅程資料夾</h2>
-                <div class="bg-gray-800 text-white p-5 rounded-2xl ios-shadow relative overflow-hidden text-sm">
-                    <h3 class="font-bold text-lg mb-3"><i class="fa-solid fa-car-side mr-2"></i>租車資訊 (SF)</h3>
-                    <p><span class="text-gray-400">公司:</span> Thrifty | <span class="text-white">Genesis G70 (或同級)</span></p>
-                    <p><span class="text-gray-400">取車:</span> 2/14 09:00 @ O’Farrell St</p>
-                    <p><span class="text-gray-400">還車:</span> 2/16 18:30 @ SFO</p>
-                </div>
-                <div class="bg-jp-card p-5 rounded-2xl ios-shadow border-l-4 border-jp-accent text-sm">
-                    <h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-plane-departure mr-2"></i>航班資訊</h3>
-                    <p>2/12: JX012 / BR028 (TPE ✈ SFO)</p>
-                    <p>2/16: SFO ✈ LAS (F94402) 20:30</p>
-                    <p>2/21: JX001 / BR015 (22:50 LAX ✈ TPE)</p>
+            <div v-if="currentTab === 'info'" class="space-y-4 p-4">
+                <h2 class="text-xl font-serif font-bold">旅程資訊</h2>
+                <div class="bg-white p-4 rounded-xl ios-shadow text-sm space-y-2">
+                    <p><strong>租車:</strong> Thrifty (O'farrell St)</p>
+                    <p><strong>航班:</strong> JX012, BR028, F94402, JX001</p>
                 </div>
             </div>
-
-            <div v-if="currentTab === 'wallet'" class="space-y-4 animate-fade-in">
-                 <div class="bg-jp-accent text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
-                    <p class="text-blue-100 text-sm">總支出 (USD)</p>
-                    <p class="text-4xl font-serif font-bold mt-1">${{ totalExpense.toLocaleString() }}</p>
-                    <div class="mt-4 flex space-x-2">
-                        <input v-model="newExpenseName" type="text" placeholder="項目" class="w-1/2 p-2 rounded text-black text-sm">
-                        <input v-model.number="newExpenseAmount" type="number" placeholder="$" class="w-1/3 p-2 rounded text-black text-sm">
-                        <button @click="addExpense" class="bg-tag-buy text-white px-3 rounded"><i class="fa-solid fa-plus"></i></button>
-                    </div>
-                 </div>
-                 <div v-for="(exp, index) in expenses" :key="index" class="bg-white p-3 rounded-xl flex justify-between ios-shadow text-sm">
-                    <span>{{ exp.name }}</span><span class="font-bold text-jp-accent">${{ exp.amount }}</span>
-                 </div>
+            
+            <div v-if="currentTab === 'wallet'" class="p-4">
+                <h2 class="text-xl font-serif font-bold mb-4">支出統計</h2>
+                <div class="bg-jp-accent text-white p-6 rounded-2xl shadow-lg">
+                    <p class="text-sm opacity-80">總支出 (USD)</p>
+                    <p class="text-4xl font-bold mt-1">${{ totalExpense }}</p>
+                </div>
             </div>
         </main>
 
-        <nav class="bg-white border-t flex justify-around items-center h-[80px] shrink-0 safe-bottom z-50">
-            <button @click="currentTab = 'trip'" :class="currentTab === 'trip' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3"><i class="fa-solid fa-map text-xl"></i><span class="text-[10px]">行程</span></button>
-            <button @click="currentTab = 'info'" :class="currentTab === 'info' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3"><i class="fa-solid fa-suitcase text-xl"></i><span class="text-[10px]">資訊</span></button>
-            <button @click="currentTab = 'wallet'" :class="currentTab === 'wallet' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3"><i class="fa-solid fa-wallet text-xl"></i><span class="text-[10px]">記帳</span></button>
+        <nav class="bg-white border-t flex justify-around items-center h-[80px] shrink-0 safe-bottom">
+            <button @click="currentTab = 'trip'" :class="currentTab === 'trip' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3"><i class="fa-solid fa-map"></i><span class="text-xs">行程</span></button>
+            <button @click="currentTab = 'info'" :class="currentTab === 'info' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3"><i class="fa-solid fa-suitcase"></i><span class="text-xs">資訊</span></button>
+            <button @click="currentTab = 'wallet'" :class="currentTab === 'wallet' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3"><i class="fa-solid fa-wallet"></i><span class="text-xs">記帳</span></button>
         </nav>
     </div>
 
@@ -140,83 +116,67 @@
                     currentTab: 'trip', 
                     activeDayIndex: 0,
                     loadingWeather: false,
-                    newExpenseName: '',
-                    newExpenseAmount: null,
                     expenses: [],
                     itinerary: [
                         { day: 1, date: "2/12 (四)", lat: 37.7749, lon: -122.4194, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "19:00", type: "transport", title: "抵達舊金山 (SFO)", desc: "搭 BART/Uber 前往市區。", location: "SFO Airport", image: "https://images.unsplash.com/photo-1521464302861-ce943915d1c3?w=800", tags: [{text: "✈️ JX012", type: "info"}] },
+                            { time: "19:00", type: "transport", title: "抵達舊金山 (SFO)", desc: "搭 BART/Uber 前往市區。", location: "SFO Airport", image: "https://images.unsplash.com/photo-1521464302861-ce943915d1c3?w=800", tags: [{text: "✈️ JX012", type: "info"},{ text: "✈️ BR028", type: "info" }] },
                             { time: "住宿", type: "hotel", title: "Found Hotel Carlton", desc: "晚餐簡單吃，調時差。", location: "545 Jones St, San Francisco", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800" }
                         ]},
                         { day: 2, date: "2/13 (五)", lat: 37.7749, lon: -122.4194, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "舊金山市區", desc: "• 叮噹車\n• 九曲花街\n• 漁人碼頭看海獅\n• 金門大橋。", location: "Pier 39", image: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800", tags: [{text: "惡魔島看天氣", type: "important"}] },
+                            { time: "行程", type: "attraction", title: "舊金山市區", desc: "• 叮噹車\n• 九曲花街\n• 漁人碼頭看海獅\n• 金門大橋。", location: "Pier 39", image: "https://images.unsplash.com/photo-1501594907352-04cda38ebc29?w=800", tags: [{text: "惡魔島看天氣", type: "important"},{text: "🍴Boudin Bakery", type: "info"},{text: "🍴Scoma’s", type: "info"}] },
                             { time: "住宿", type: "hotel", title: "Found Hotel Carlton", location: "545 Jones St, San Francisco", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800" }
                         ]},
                         { day: 3, date: "2/14 (六)", lat: 38.2975, lon: -122.2869, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "09:00", type: "transport", title: "租車", desc: "取車：Thrifty", location: "Thrifty Car Rental-O'farrell Street", image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?w=800" },
-                            { time: "10:00", type: "attraction", title: "Napa Valley", desc: "💝西洋情人節 品酒行程。", location: "Napa Valley", image: "https://images.unsplash.com/photo-1598284443743-a2ff1915f9e3?w=800", tags: [{text: "🍷品酒行程", type: "info"}] },
+                            { time: "09:00", type: "transport", title: "租車", desc: "取車：Thrifty", location: "Thrifty Car Rental-O'farrell Street Ca Tle", image: "https://d2f9dw3b0opbul.cloudfront.net/5ee55371520d406584be5d9d71638b00.jpg?w=3840&q=100", tags: [{text: "指定駕駛", type: "important"}] },
+                            { time: "10:00", type: "attraction", title: "Napa Valley", desc: "💝西洋情人節\n品酒行程 (選1-2間)。", location: "Napa Valley", image: "https://images.unsplash.com/photo-1598284443743-a2ff1915f9e3?q=80&w=2070&auto=format&fit=crop", tags: [{text: "🍷Robert Mondavi", type: "info"},{text: "🍷Castello di Amorosa", type: "info"},{text: "🍷V. Sattui Winery", type: "info"}] },
                             { time: "住宿", type: "hotel", title: "Crowne Plaza SFO", desc: "機場飯店，方便明日南下。", location: "1177 Airport Blvd, Burlingame", image: "https://images.unsplash.com/photo-1551882547-ff43c63faf76?w=800" }
                         ]},
                         { day: 4, date: "2/15 (日)", lat: 36.6002, lon: -121.8947, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "Monterey / 17-Mile Drive", desc: "Lone Cypress、The Ghost Tree。", location: "17 Mile Dr", image: "https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800" },
-                            { time: "住宿", type: "hotel", title: "Holiday Inn Express Marina", location: "189 Seaside Cir, Marina", image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800" }
+                            { time: "行程", type: "attraction", title: "Monterey / 17-Mile Drive", desc: "Lone Cypress (孤柏)、The Ghost Tree (鬼樹)", location: "17 Mile Dr", image: "https://drupal-prod.visitcalifornia.com/sites/default/files/styles/fluid_1920/public/VCW_D_MontCarmel_17Mile_Seeff_sized.jpg.webp?itok=VVdfUNWI", tags: [{text: "車程約2.5hr", type: "important"},{ text: "時間夠可以去 Capitola Village", type: "info" }] },
+                            { time: "17:00", type: "attraction", title: "Cannery Row 罐頭廠街", desc: "逛街看日落。", location: "Cannery Row", image: "https://images.unsplash.com/photo-1533130061792-64b345e4a833?w=800", tags: [{text: "🍴The Sardine Factory", type: "info"},{ text: "🍴Hula’s Island Grill", type: "info" }] },
+                            { time: "住宿", type: "hotel", title: "Holiday Inn Express Marina", desc: "State Beach Area。", location: "189 Seaside Cir, Marina", image: "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=800" }
                         ]},
                         { day: 5, date: "2/16 (一)", lat: 36.3582, lon: -121.9029, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "Big Sur / Bixby Bridge", desc: "McWay Falls、Bixby Bridge。\n下午開回 SFO。", location: "Bixby Creek Bridge", image: "https://images.unsplash.com/photo-1508120969819-75c1977c3fb2?w=800" },
-                            { time: "20:30", type: "transport", title: "飛往 拉斯維加斯", desc: "SFO ✈ LAS (F94402)。", location: "SFO Airport", image: "https://images.unsplash.com/photo-1436491865332-7a61a109c7f3?w=800" },
-                            { time: "住宿", type: "hotel", title: "Jockey Club Las Vegas", location: "3700 S Las Vegas Blvd, Las Vegas", image: "https://www.jockeyclubvegas.com/wp-content/gallery/homepage-slideshow/slide6.jpg" }
+                            { time: "行程", type: "attraction", title: "Big Sur 精華", desc: "Bixby Bridge、McWay Falls。\n下午開回 SFO。", location: "Bixby Creek Bridge", image: "https://images.unsplash.com/photo-1508120969819-75c1977c3fb2?w=800" },
+                            { time: "18:30", type: "transport", title: "還車 ✈ 飛往 拉斯維加斯", desc: "還車點：SFO Rental Car Center。", location: "SFO Airport", image: "https://images.unsplash.com/photo-1436491865332-7a61a109c7f3?w=800", tags: [{text: "✈️ F94402", type: "info"}] },
+                            { time: "23:30", type: "attraction", title: "晚餐逛逛", desc: "In‑N‑Out Burger（第一次到必吃）", location: "2900 W Sahara Ave, Las Vegas", image: "https://images.unsplash.com/photo-1550547660-d9450f859349?w=800", tags: [{text: "Animal style French Fries必點", type: "info"}] },
+                            { time: "住宿", type: "hotel", title: "Jockey Club Las Vegas", desc: "No resort fee", location: "3700 S Las Vegas Blvd, Las Vegas", image: "https://www.jockeyclubvegas.com/wp-content/gallery/homepage-slideshow/slide6.jpg" }
                         ]},
                         { day: 6, date: "2/17 (二)", lat: 36.1699, lon: -115.1398, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "Las Vegas Strip", desc: "百樂宮噴泉、Sphere 大圓球。", location: "Las Vegas Strip", image: "https://images.actiontourguide.com/wp-content/uploads/2023/11/16114241/Las-Vegas-Strip-1-1024x705.jpg" },
-                            { time: "住宿", type: "hotel", title: "續住 Jockey Club", location: "Jockey Club Las Vegas" }
+                            { time: "行程", type: "attraction", title: "Las Vegas Strip", desc: "• 百樂宮噴泉\n• 凱薩宮\n• Sphere (大圓球)。", location: "Las Vegas Strip", image: "https://images.actiontourguide.com/wp-content/uploads/2023/11/16114241/Las-Vegas-Strip-1-1024x705.jpg" },
+                            { time: "住宿", type: "hotel", title: "續住 Jockey Club", desc: "拉斯維加斯大道中心。", location: "Jockey Club Las Vegas", image: "https://www.jockeyclubvegas.com/wp-content/gallery/homepage-slideshow/slide6.jpg" }
                         ]},
                         { day: 7, date: "2/18 (三)", lat: 35.9788, lon: -114.9817, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "Hoover Dam / Valley of Fire", desc: "胡佛水壩、火焰谷紅岩。", location: "Valley of Fire State Park", image: "https://images.unsplash.com/photo-1532938833973-1d019f2a99c9?w=800" },
-                            { time: "住宿", type: "hotel", title: "Holiday Inn Express Henderson", location: "Henderson, NV", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800" }
+                            { time: "行程", type: "attraction", title: "Hoover Dam / Valley of Fire", desc: "胡佛水壩、Lake Mead、火焰谷紅岩。", location: "Valley of Fire State Park", image: "https://images.unsplash.com/photo-1532938833973-1d019f2a99c9?w=800", tags: [{text: "備水防曬", type: "important"}] },
+                            { time: "住宿", type: "hotel", title: "Holiday Inn Express Henderson", desc: "Henderson South。", location: "Henderson, NV", image: "https://images.unsplash.com/photo-1566073771259-6a8506099945?w=800" }
                         ]},
                         { day: 8, date: "2/19 (四)", lat: 34.1808, lon: -118.3089, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "Red Rock Canyon / LA", desc: "開往洛杉磯 (約5hr)。", location: "Red Rock Canyon", image: "https://images.unsplash.com/photo-1493243350443-9e3048ce7288?w=800" },
-                            { time: "住宿", type: "hotel", title: "Hotel Burbank", location: "150 E Angeleno Ave, Burbank", image: "https://images.unsplash.com/photo-1582298538104-fe2e74c2ed54?w=800" }
+                            { time: "行程", type: "attraction", title: "Red Rock Canyon / LA", desc: "紅岩峽谷、Mount Charleston 中停。\n開往洛杉磯 (約5hr)。", location: "Red Rock Canyon", image: "https://images.unsplash.com/photo-1493243350443-9e3048ce7288?w=800", tags: [{text: "長途移動", type: "info"}] },
+                            { time: "住宿", type: "hotel", title: "Hotel Burbank", desc: "Burbank 區 (2/19-2/20)。", location: "150 E Angeleno Ave, Burbank", image: "https://images.unsplash.com/photo-1582298538104-fe2e74c2ed54?w=800" }
                         ]},
                         { day: 9, date: "2/20 (五)", lat: 34.0522, lon: -118.2437, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "行程", type: "attraction", title: "洛杉磯東側行程", desc: "Pasadena / 晚餐：韓式烤腸。", location: "Ahgassi Gopchang", image: "https://images.unsplash.com/photo-1593026330050-8b0126a310c1?w=800" },
-                            { time: "住宿", type: "hotel", title: "續住 Hotel Burbank", location: "Hotel Burbank" }
+                            { time: "行程", type: "attraction", title: "洛杉磯東側行程", desc: "Pasadena / San Gabriel Valley\n晚餐：Ahgassi Gopchang (韓式烤腸)。", location: "Ahgassi Gopchang", image: "https://images.unsplash.com/photo-1593026330050-8b0126a310c1?w=800", tags: [{text: "必吃烤腸", type: "info"}] },
+                            { time: "住宿", type: "hotel", title: "續住 Hotel Burbank", location: "Hotel Burbank", image: "https://images.unsplash.com/photo-1582298538104-fe2e74c2ed54?w=800" }
                         ]},
                         { day: 10, date: "2/21 (六)", lat: 33.9416, lon: -118.4085, weather: "載入中...", weatherCode: 0, items: [
-                            { time: "09:45", type: "attraction", title: "Citadel Outlets 採購", desc: "15:00 離開前往機場。", location: "Citadel Outlets", image: "https://images.unsplash.com/photo-1560963689-09332d7dc15d?w=800" },
-                            { time: "22:50", type: "transport", title: "搭機返程", desc: "JX001 / BR015 飛往 TPE。", location: "LAX Airport" }
+                            { time: "09:45", type: "attraction", title: "Citadel Outlets 採購", desc: "最後購物行程。15:00 離開前往機場。", location: "Citadel Outlets", image: "https://images.unsplash.com/photo-1560963689-09332d7dc15d?w=800", tags: [{text: "15:00離開", type: "important"}] },
+                            { time: "22:50", type: "transport", title: "搭機返程", desc: "JX001 / BR015 飛往 TPE。", location: "LAX Airport", tags: [{text: "返程航班", type: "info"}] }
                         ]}
                     ]
-                }
+                };
             },
             computed: { 
                 currentDateDisplay() { return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); },
                 totalExpense() { return this.expenses.reduce((sum, item) => sum + item.amount, 0); }
             },
             methods: {
-                getIcon(type, title) {
-                    const t = title.toLowerCase();
-                    if (t.includes('outlet') || t.includes('買') || t.includes('採購')) return 'fa-solid fa-bag-shopping';
-                    const icons = { 'transport': 'fa-solid fa-car', 'food': 'fa-solid fa-utensils', 'attraction': 'fa-solid fa-camera', 'hotel': 'fa-solid fa-bed' };
-                    return icons[type] || 'fa-solid fa-circle';
-                },
-                getTagClass(type) { return type === 'important' ? 'text-white bg-tag-food' : 'text-jp-accent bg-blue-50'; },
                 getWeatherIcon(code) {
                     if (code === 0) return 'fa-solid fa-sun';
                     if (code >= 1 && code <= 3) return 'fa-solid fa-cloud-sun';
-                    if (code >= 51 && code <= 67) return 'fa-solid fa-cloud-rain';
                     return 'fa-solid fa-cloud';
                 },
-                openMap(loc) { 
-                    if(loc) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'); 
-                },
-                addExpense() { 
-                    if (this.newExpenseName && this.newExpenseAmount) { 
-                        this.expenses.unshift({ name: this.newExpenseName, amount: this.newExpenseAmount }); 
-                        this.newExpenseName = ''; this.newExpenseAmount = null; this.save(); 
-                    } 
-                },
-                save() { localStorage.setItem('us_trip_exp', JSON.stringify(this.expenses)); },
+                getTagClass(type) { return type === 'important' ? 'text-white bg-tag-food' : 'text-jp-accent bg-blue-50'; },
+                openMap(loc) { if(loc) window.open(`https://www.google.com/maps/search/${encodeURIComponent(loc)}`, '_blank'); },
                 async fetchWeather() {
                     this.loadingWeather = true;
                     try {
@@ -230,15 +190,11 @@
                             }
                         });
                         await Promise.all(promises);
-                    } catch (e) { console.error("Weather error", e); }
+                    } catch (e) { console.error(e); }
                     this.loadingWeather = false;
                 }
             },
-            mounted() { 
-                const saved = localStorage.getItem('us_trip_exp'); 
-                if (saved) this.expenses = JSON.parse(saved);
-                this.fetchWeather(); 
-            }
+            mounted() { this.fetchWeather(); }
         }).mount('#app');
     </script>
 </body>
