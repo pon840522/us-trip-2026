@@ -84,7 +84,7 @@
                 </div>
             </div>
 
-            <div v-if="currentTab === 'info'" class="space-y-4 p-4">
+            <div v-if="currentTab === 'info'" class="space-y-4 p-4 animate-fade-in">
                 <h2 class="text-xl font-serif font-bold">旅程資訊</h2>
                 <div class="bg-white p-4 rounded-xl ios-shadow text-sm space-y-2">
                     <p><strong>租車:</strong> Thrifty (O'farrell St)</p>
@@ -92,11 +92,46 @@
                 </div>
             </div>
             
-            <div v-if="currentTab === 'wallet'" class="p-4">
-                <h2 class="text-xl font-serif font-bold mb-4">支出統計</h2>
+            <div v-if="currentTab === 'wallet'" class="p-4 space-y-6 animate-fade-in">
+                <h2 class="text-xl font-serif font-bold">支出統計</h2>
+                
                 <div class="bg-jp-accent text-white p-6 rounded-2xl shadow-lg">
                     <p class="text-sm opacity-80">總支出 (USD)</p>
-                    <p class="text-4xl font-bold mt-1">${{ totalExpense }}</p>
+                    <p class="text-4xl font-bold mt-1">${{ totalExpense.toLocaleString() }}</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl ios-shadow space-y-3">
+                    <h3 class="font-bold text-sm text-jp-sub uppercase tracking-wider">新增支出</h3>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input v-model="newExpense.title" type="text" placeholder="項目 (如：午餐)" class="col-span-2 border-b border-gray-100 p-2 text-sm focus:outline-none focus:border-jp-accent bg-transparent">
+                        <input v-model.number="newExpense.amount" type="number" placeholder="金額 (USD)" class="border-b border-gray-100 p-2 text-sm focus:outline-none focus:border-jp-accent bg-transparent">
+                        <input v-model="newExpense.payer" type="text" placeholder="新增者" class="border-b border-gray-100 p-2 text-sm focus:outline-none focus:border-jp-accent bg-transparent">
+                    </div>
+                    <button @click="addExpense" class="w-full bg-jp-accent text-white py-2 rounded-lg text-sm font-bold mt-2">
+                        <i class="fa-solid fa-plus mr-1"></i> 加入清單
+                    </button>
+                </div>
+
+                <div class="space-y-3">
+                    <h3 class="font-bold text-sm text-jp-sub uppercase tracking-wider px-1">支出明細</h3>
+                    <div v-if="expenses.length === 0" class="text-center py-10 text-jp-sub text-sm bg-white rounded-2xl border-2 border-dashed border-gray-100">
+                        目前尚無記錄
+                    </div>
+                    <div v-for="(exp, index) in expenses" :key="index" class="bg-white p-4 rounded-xl ios-shadow flex justify-between items-center animate-fade-in">
+                        <div class="flex-1">
+                            <div class="font-bold text-jp-text">{{ exp.title }}</div>
+                            <div class="text-xs text-jp-sub">
+                                <span class="bg-gray-100 px-1.5 py-0.5 rounded mr-2"><i class="fa-solid fa-user text-[10px] mr-1"></i>{{ exp.payer || '不具名' }}</span>
+                                <span>{{ exp.date }}</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <span class="font-bold text-jp-accent">${{ exp.amount }}</span>
+                            <button @click="deleteExpense(index)" class="text-red-300 hover:text-red-500 transition">
+                                <i class="fa-solid fa-trash-can"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
         </main>
@@ -116,7 +151,8 @@
                     currentTab: 'trip', 
                     activeDayIndex: 0,
                     loadingWeather: false,
-                    expenses: [],
+                    expenses: JSON.parse(localStorage.getItem('us_trip_expenses')) || [],
+                    newExpense: { title: '', amount: '', payer: '' },
                     itinerary: [
                         { day: 1, date: "2/12 (四)", lat: 37.7749, lon: -122.4194, weather: "載入中...", weatherCode: 0, items: [
                             { time: "19:00", type: "transport", title: "抵達舊金山 (SFO)", desc: "搭 BART/Uber 前往市區。", location: "SFO Airport", image: "https://images.unsplash.com/photo-1521464302861-ce943915d1c3?w=800", tags: [{text: "✈️ JX012", type: "info"},{ text: "✈️ BR028", type: "info" }] },
@@ -165,6 +201,14 @@
                     ]
                 };
             },
+            watch: {
+                expenses: {
+                    handler(newVal) {
+                        localStorage.setItem('us_trip_expenses', JSON.stringify(newVal));
+                    },
+                    deep: true
+                }
+            },
             computed: { 
                 currentDateDisplay() { return new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }); },
                 totalExpense() { return this.expenses.reduce((sum, item) => sum + item.amount, 0); }
@@ -176,7 +220,7 @@
                     return 'fa-solid fa-cloud';
                 },
                 getTagClass(type) { return type === 'important' ? 'text-white bg-tag-food' : 'text-jp-accent bg-blue-50'; },
-                openMap(loc) { if(loc) window.open(`https://www.google.com/maps/search/${encodeURIComponent(loc)}`, '_blank'); },
+                openMap(loc) { if(loc) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'); },
                 async fetchWeather() {
                     this.loadingWeather = true;
                     try {
@@ -192,6 +236,24 @@
                         await Promise.all(promises);
                     } catch (e) { console.error(e); }
                     this.loadingWeather = false;
+                },
+                addExpense() {
+                    if (!this.newExpense.title || !this.newExpense.amount) {
+                        alert("請填寫項目與金額");
+                        return;
+                    }
+                    this.expenses.unshift({
+                        ...this.newExpense,
+                        date: new Date().toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
+                    });
+                    // 清空輸入，保留「新增者」方便連續輸入
+                    const lastPayer = this.newExpense.payer;
+                    this.newExpense = { title: '', amount: '', payer: lastPayer };
+                },
+                deleteExpense(index) {
+                    if(confirm("確定要刪除這筆支出嗎？")) {
+                        this.expenses.splice(index, 1);
+                    }
                 }
             },
             mounted() { this.fetchWeather(); }
