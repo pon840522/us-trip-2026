@@ -84,11 +84,51 @@
                 </div>
             </div>
 
-            <div v-if="currentTab === 'info'" class="space-y-4 p-4 animate-fade-in">
-                <h2 class="text-xl font-serif font-bold">旅程資訊</h2>
-                <div class="bg-white p-4 rounded-xl ios-shadow text-sm space-y-2">
-                    <p><strong>租車:</strong> Thrifty (O'farrell St)</p>
-                    <p><strong>航班:</strong> JX012, BR028, F94402, JX001</p>
+<div v-if="currentTab === 'info'" class="space-y-4 p-4 animate-fade-in">
+                <h2 class="text-xl font-serif font-bold mb-4 text-jp-accent">旅程資料夾</h2>
+                
+                <div class="bg-white p-5 rounded-2xl ios-shadow border-l-4 border-tag-food text-sm space-y-3">
+                    <h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-hotel mr-2 text-tag-food"></i>住宿清單</h3>
+                    <div class="space-y-4">
+                        <div class="border-b border-gray-100 pb-2">
+                            <p class="text-xs text-jp-sub">2/12 - 2/14 (2晚)</p>
+                            <p class="font-medium text-jp-text">Found Hotel Carlton</p>
+                            <p class="text-[10px] text-gray-400 font-light">訂房人: 鄭</p>
+                        </div>
+                        <div class="border-b border-gray-100 pb-2">
+                            <p class="text-xs text-jp-sub">2/14 - 2/15 (1晚)</p>
+                            <p class="font-medium text-jp-text">Crowne Plaza SFO</p>
+                            <p class="text-[10px] text-gray-400 font-light">訂房人: Juna</p>
+                        </div>
+                        <div class="border-b border-gray-100 pb-2">
+                            <p class="text-xs text-jp-sub">2/15 - 2/16 (1晚)</p>
+                            <p class="font-medium text-jp-text">Holiday Inn Express Marina</p>
+                            <p class="text-[10px] text-gray-400 font-light">訂房人: Juna</p>
+                        </div>
+                        <div class="border-b border-gray-100 pb-2">
+                            <p class="text-xs text-jp-sub">2/16 - 2/18 (2晚)</p>
+                            <p class="font-medium text-jp-text">Jockey Club Las Vegas</p>
+                            <p class="text-[10px] text-gray-400 font-light">訂房人: 鄭</p>
+                        </div>
+                        <div class="border-b border-gray-100 pb-2">
+                            <p class="text-xs text-jp-sub">2/18 - 2/19 (1晚)</p>
+                            <p class="font-medium text-jp-text">Atwell Suites Herderson</p>
+                            <p class="text-[10px] text-gray-400 font-light">訂房人: Juna</p>
+                        </div>
+                        <div>
+                            <p class="text-xs text-jp-sub">2/19 - 2/21 (2晚)</p>
+                            <p class="font-medium text-jp-text">Hotel Burbank</p>
+                            <p class="text-[10px] text-gray-400 font-light">訂房人: 溫</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-800 text-white p-5 rounded-2xl ios-shadow relative overflow-hidden text-sm">
+                    <h3 class="font-bold text-lg mb-3"><i class="fa-solid fa-car-side mr-2"></i>交通資訊</h3>
+                    <div class="space-y-2">
+                        <p><span class="text-gray-400">租車：</span>Thrifty (O'farrell St)</p>
+                        <p><span class="text-gray-400">航班：</span>JX012, BR028, F94402, JX001</p>
+                    </div>
                 </div>
             </div>
             
