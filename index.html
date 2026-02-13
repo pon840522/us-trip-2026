@@ -123,7 +123,7 @@
                         <p class="text-sm opacity-80">總支出 (USD)</p>
                         <p class="text-4xl font-bold mt-1">${{ totalExpense.toLocaleString() }}</p>
                         <button @click="calculateSettlement" class="mt-4 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm w-full font-bold border border-white/30">
-                            <i class="fa-solid fa-calculator mr-2"></i>結算：誰該給誰錢？
+                            <i class="fa-solid fa-calculator mr-2"></i>結算：三人分帳
                         </button>
                     </div>
                     <i class="fa-solid fa-sack-dollar absolute -bottom-4 -right-4 text-9xl text-white opacity-10"></i>
@@ -134,11 +134,11 @@
                     <div class="grid grid-cols-2 gap-2">
                         <input v-model="newExpense.title" type="text" placeholder="項目 (如：午餐)" class="col-span-2 border-b border-gray-100 p-2 text-sm focus:outline-none focus:border-jp-accent bg-transparent">
                         <input v-model.number="newExpense.amount" type="number" placeholder="金額 (USD)" class="border-b border-gray-100 p-2 text-sm focus:outline-none focus:border-jp-accent bg-transparent">
-                        <input v-model="newExpense.payer" type="text" placeholder="付款人姓名" list="payers" class="border-b border-gray-100 p-2 text-sm focus:outline-none focus:border-jp-accent bg-transparent">
+                        <input v-model="newExpense.payer" type="text" placeholder="付款人 (點選或輸入)" list="payers" class="border-b border-gray-100 p-2 text-sm focus:outline-none focus:border-jp-accent bg-transparent">
                         <datalist id="payers">
-                            <option value="鄭"></option>
-                            <option value="Juna"></option>
                             <option value="溫"></option>
+                            <option value="鄭"></option>
+                            <option value="彭"></option>
                         </datalist>
                     </div>
                     <button @click="addExpense" class="w-full bg-jp-accent text-white py-2 rounded-lg text-sm font-bold mt-2">
@@ -175,7 +175,7 @@
                 <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showSettlementModal = false"></div>
                 <div class="bg-white w-full max-w-sm rounded-3xl p-6 relative z-10 shadow-2xl max-h-[80vh] overflow-y-auto">
                     <div class="flex justify-between items-center mb-4">
-                        <h3 class="text-xl font-bold font-serif text-jp-accent">結算報告</h3>
+                        <h3 class="text-xl font-bold font-serif text-jp-accent">三人結算報告</h3>
                         <button @click="showSettlementModal = false" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
                     </div>
                     
@@ -185,12 +185,12 @@
                             <span class="font-bold">${{ totalExpense.toFixed(1) }}</span>
                         </div>
                         <div class="flex justify-between text-sm">
-                            <span class="text-gray-500">每人平均</span>
+                            <span class="text-gray-500">每人應付 (÷3)</span>
                             <span class="font-bold text-jp-accent">${{ settlementData.average.toFixed(1) }}</span>
                         </div>
                     </div>
 
-                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">已付款項統計</h4>
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">已先墊付統計</h4>
                     <div class="space-y-2 mb-6">
                         <div v-for="(amount, name) in settlementData.paid" :key="name" class="flex justify-between items-center text-sm border-b border-gray-100 pb-1">
                             <span>{{ name }}</span>
@@ -266,10 +266,10 @@
                     settlementData: { paid: {}, average: 0, transfers: [] },
                     hotelList: [
                          {date: "2/12 - 2/14", name: "Found Hotel Carlton", booker: "鄭"},
-                         {date: "2/14 - 2/15", name: "Crowne Plaza SFO", booker: "Juna"},
-                         {date: "2/15 - 2/16", name: "Holiday Inn Express Marina", booker: "Juna"},
+                         {date: "2/14 - 2/15", name: "Crowne Plaza SFO", booker: "彭"},
+                         {date: "2/15 - 2/16", name: "Holiday Inn Express Marina", booker: "彭"},
                          {date: "2/16 - 2/18", name: "Jockey Club Las Vegas", booker: "鄭"},
-                         {date: "2/18 - 2/19", name: "Atwell Suites Herderson", booker: "Juna"},
+                         {date: "2/18 - 2/19", name: "Atwell Suites Herderson", booker: "彭"},
                          {date: "2/19 - 2/21", name: "Hotel Burbank", booker: "溫"}
                     ],
                     itinerary: [
@@ -342,7 +342,7 @@
                 openMap(loc) { if(loc) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'); },
                 getPayerColor(name) {
                     if(!name) return 'text-gray-500';
-                    const colors = {'鄭': 'text-blue-600', 'Juna': 'text-purple-600', '溫': 'text-orange-600'};
+                    const colors = {'鄭': 'text-blue-600', '彭': 'text-purple-600', '溫': 'text-orange-600'};
                     return colors[name] || 'text-jp-text';
                 },
                 async fetchWeather() {
@@ -379,39 +379,38 @@
                     }
                 },
                 calculateSettlement() {
+                    // 1. 指定這三個人 (不管他們有沒有付錢，都要算分母)
+                    const members = ['溫', '鄭', '彭'];
                     const balances = {};
+                    members.forEach(m => balances[m] = 0); // 初始化為 0
+
                     let total = 0;
                     
-                    // 1. 統計每個人付了多少
+                    // 2. 統計每個人的付款金額
                     this.expenses.forEach(e => {
-                        const name = e.payer ? e.payer.trim() : '未具名';
-                        if (!balances[name]) balances[name] = 0;
-                        balances[name] += parseFloat(e.amount);
-                        total += parseFloat(e.amount);
+                        let amount = parseFloat(e.amount);
+                        total += amount;
+                        // 如果付款人是這三人之一，就記在他頭上
+                        if (e.payer && members.includes(e.payer.trim())) {
+                            balances[e.payer.trim()] += amount;
+                        }
                     });
 
-                    // 2. 假設 '未具名' 不參與分帳計算（或你可以決定要不要算進去）
-                    // 這裡假設是三個人均分，但只計算有名字出現過的人
-                    const people = Object.keys(balances).filter(n => n !== '未具名');
-                    if (people.length === 0) {
-                        alert("請先輸入付款人姓名才能計算");
-                        return;
-                    }
-
-                    const average = total / people.length;
+                    // 3. 強制除以 3 (三人分帳)
+                    const average = total / members.length;
                     
-                    // 3. 計算差額
+                    // 4. 計算差額
                     let debtors = []; // 少付錢的人 (要給錢)
                     let creditors = []; // 多付錢的人 (要收錢)
 
-                    people.forEach(p => {
+                    members.forEach(p => {
                         const paid = balances[p];
                         const diff = paid - average;
                         if (diff < -0.01) debtors.push({ name: p, amount: -diff }); // 存正數
                         else if (diff > 0.01) creditors.push({ name: p, amount: diff });
                     });
 
-                    // 4. 配對 (簡單貪婪算法)
+                    // 5. 配對 (簡單貪婪算法)
                     let transfers = [];
                     let i = 0; // debtor index
                     let j = 0; // creditor index
