@@ -24,11 +24,13 @@
         .ios-shadow { box-shadow: 0 4px 20px rgba(0,0,0,0.06); }
         .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
         .animate-fade-in { animation: fadeIn 0.4s ease-out; }
+        .modal-enter-active, .modal-leave-active { transition: opacity 0.3s ease; }
+        .modal-enter-from, .modal-leave-to { opacity: 0; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
 <body class="text-jp-text h-screen flex flex-col overflow-hidden">
-    <div id="app" class="flex flex-col h-full">
+    <div id="app" class="flex flex-col h-full relative">
         <header class="bg-jp-bg px-6 pt-12 pb-4 flex justify-between items-end shrink-0">
             <div>
                 <p class="text-sm text-jp-sub tracking-widest mb-1">TRAVEL ITINERARY</p>
@@ -84,41 +86,16 @@
                 </div>
             </div>
 
-<div v-if="currentTab === 'info'" class="space-y-4 p-4 animate-fade-in">
+            <div v-if="currentTab === 'info'" class="space-y-4 p-4 animate-fade-in">
                 <h2 class="text-xl font-serif font-bold mb-4 text-jp-accent">旅程資料夾</h2>
                 
                 <div class="bg-white p-5 rounded-2xl ios-shadow border-l-4 border-tag-food text-sm space-y-3">
                     <h3 class="font-bold text-lg mb-2"><i class="fa-solid fa-hotel mr-2 text-tag-food"></i>住宿清單</h3>
                     <div class="space-y-4">
-                        <div class="border-b border-gray-100 pb-2">
-                            <p class="text-xs text-jp-sub">2/12 - 2/14 (2晚)</p>
-                            <p class="font-medium text-jp-text">Found Hotel Carlton</p>
-                            <p class="text-[10px] text-gray-400 font-light">訂房人: 鄭</p>
-                        </div>
-                        <div class="border-b border-gray-100 pb-2">
-                            <p class="text-xs text-jp-sub">2/14 - 2/15 (1晚)</p>
-                            <p class="font-medium text-jp-text">Crowne Plaza SFO</p>
-                            <p class="text-[10px] text-gray-400 font-light">訂房人: Juna</p>
-                        </div>
-                        <div class="border-b border-gray-100 pb-2">
-                            <p class="text-xs text-jp-sub">2/15 - 2/16 (1晚)</p>
-                            <p class="font-medium text-jp-text">Holiday Inn Express Marina</p>
-                            <p class="text-[10px] text-gray-400 font-light">訂房人: Juna</p>
-                        </div>
-                        <div class="border-b border-gray-100 pb-2">
-                            <p class="text-xs text-jp-sub">2/16 - 2/18 (2晚)</p>
-                            <p class="font-medium text-jp-text">Jockey Club Las Vegas</p>
-                            <p class="text-[10px] text-gray-400 font-light">訂房人: 鄭</p>
-                        </div>
-                        <div class="border-b border-gray-100 pb-2">
-                            <p class="text-xs text-jp-sub">2/18 - 2/19 (1晚)</p>
-                            <p class="font-medium text-jp-text">Atwell Suites Herderson</p>
-                            <p class="text-[10px] text-gray-400 font-light">訂房人: Juna</p>
-                        </div>
-                        <div>
-                            <p class="text-xs text-jp-sub">2/19 - 2/21 (2晚)</p>
-                            <p class="font-medium text-jp-text">Hotel Burbank</p>
-                            <p class="text-[10px] text-gray-400 font-light">訂房人: 溫</p>
+                        <div class="border-b border-gray-100 pb-2" v-for="hotel in hotelList" :key="hotel.name">
+                            <p class="text-xs text-jp-sub">{{hotel.date}}</p>
+                            <p class="font-medium text-jp-text">{{hotel.name}}</p>
+                            <p class="text-[10px] text-gray-400 font-light">訂房人: {{hotel.booker}}</p>
                         </div>
                     </div>
                 </div>
@@ -133,12 +110,23 @@
                 </div>
             </div>
             
-            <div v-if="currentTab === 'wallet'" class="p-4 space-y-6 animate-fade-in">
-                <h2 class="text-xl font-serif font-bold">支出統計</h2>
+            <div v-if="currentTab === 'wallet'" class="p-4 space-y-6 animate-fade-in pb-32">
+                <div class="flex justify-between items-center">
+                    <h2 class="text-xl font-serif font-bold">支出統計</h2>
+                    <div class="flex gap-2">
+                        <button @click="showSyncModal = true" class="text-xs bg-gray-200 text-gray-600 px-3 py-1 rounded-full"><i class="fa-solid fa-arrows-rotate mr-1"></i>同步</button>
+                    </div>
+                </div>
                 
-                <div class="bg-jp-accent text-white p-6 rounded-2xl shadow-lg">
-                    <p class="text-sm opacity-80">總支出 (USD)</p>
-                    <p class="text-4xl font-bold mt-1">${{ totalExpense.toLocaleString() }}</p>
+                <div class="bg-jp-accent text-white p-6 rounded-2xl shadow-lg relative overflow-hidden">
+                    <div class="relative z-10">
+                        <p class="text-sm opacity-80">總支出 (USD)</p>
+                        <p class="text-4xl font-bold mt-1">${{ totalExpense.toLocaleString() }}</p>
+                        <button @click="calculateSettlement" class="mt-4 bg-white/20 hover:bg-white/30 backdrop-blur-sm text-white px-4 py-2 rounded-lg text-sm w-full font-bold border border-white/30">
+                            <i class="fa-solid fa-calculator mr-2"></i>結算：誰該給誰錢？
+                        </button>
+                    </div>
+                    <i class="fa-solid fa-sack-dollar absolute -bottom-4 -right-4 text-9xl text-white opacity-10"></i>
                 </div>
 
                 <div class="bg-white p-5 rounded-2xl ios-shadow space-y-3">
@@ -146,7 +134,12 @@
                     <div class="grid grid-cols-2 gap-2">
                         <input v-model="newExpense.title" type="text" placeholder="項目 (如：午餐)" class="col-span-2 border-b border-gray-100 p-2 text-sm focus:outline-none focus:border-jp-accent bg-transparent">
                         <input v-model.number="newExpense.amount" type="number" placeholder="金額 (USD)" class="border-b border-gray-100 p-2 text-sm focus:outline-none focus:border-jp-accent bg-transparent">
-                        <input v-model="newExpense.payer" type="text" placeholder="新增者" class="border-b border-gray-100 p-2 text-sm focus:outline-none focus:border-jp-accent bg-transparent">
+                        <input v-model="newExpense.payer" type="text" placeholder="付款人姓名" list="payers" class="border-b border-gray-100 p-2 text-sm focus:outline-none focus:border-jp-accent bg-transparent">
+                        <datalist id="payers">
+                            <option value="鄭"></option>
+                            <option value="Juna"></option>
+                            <option value="溫"></option>
+                        </datalist>
                     </div>
                     <button @click="addExpense" class="w-full bg-jp-accent text-white py-2 rounded-lg text-sm font-bold mt-2">
                         <i class="fa-solid fa-plus mr-1"></i> 加入清單
@@ -162,7 +155,7 @@
                         <div class="flex-1">
                             <div class="font-bold text-jp-text">{{ exp.title }}</div>
                             <div class="text-xs text-jp-sub">
-                                <span class="bg-gray-100 px-1.5 py-0.5 rounded mr-2"><i class="fa-solid fa-user text-[10px] mr-1"></i>{{ exp.payer || '不具名' }}</span>
+                                <span class="bg-gray-100 px-1.5 py-0.5 rounded mr-2" :class="getPayerColor(exp.payer)"><i class="fa-solid fa-user text-[10px] mr-1"></i>{{ exp.payer || '不具名' }}</span>
                                 <span>{{ exp.date }}</span>
                             </div>
                         </div>
@@ -176,6 +169,79 @@
                 </div>
             </div>
         </main>
+
+        <transition name="modal">
+            <div v-if="showSettlementModal" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showSettlementModal = false"></div>
+                <div class="bg-white w-full max-w-sm rounded-3xl p-6 relative z-10 shadow-2xl max-h-[80vh] overflow-y-auto">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold font-serif text-jp-accent">結算報告</h3>
+                        <button @click="showSettlementModal = false" class="text-gray-400 hover:text-gray-600"><i class="fa-solid fa-xmark text-xl"></i></button>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-xl mb-4">
+                        <div class="flex justify-between text-sm mb-2">
+                            <span class="text-gray-500">總支出</span>
+                            <span class="font-bold">${{ totalExpense.toFixed(1) }}</span>
+                        </div>
+                        <div class="flex justify-between text-sm">
+                            <span class="text-gray-500">每人平均</span>
+                            <span class="font-bold text-jp-accent">${{ settlementData.average.toFixed(1) }}</span>
+                        </div>
+                    </div>
+
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">已付款項統計</h4>
+                    <div class="space-y-2 mb-6">
+                        <div v-for="(amount, name) in settlementData.paid" :key="name" class="flex justify-between items-center text-sm border-b border-gray-100 pb-1">
+                            <span>{{ name }}</span>
+                            <span :class="amount >= settlementData.average ? 'text-green-600' : 'text-red-400'">
+                                ${{ amount }}
+                                <span class="text-[10px] ml-1 opacity-70">({{ amount >= settlementData.average ? '+' : '' }}{{ (amount - settlementData.average).toFixed(0) }})</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <h4 class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">建議轉帳方案</h4>
+                    <div v-if="settlementData.transfers.length === 0" class="text-sm text-center text-gray-500 py-2">
+                        目前帳務平衡，無需轉帳 🎉
+                    </div>
+                    <div class="space-y-3">
+                        <div v-for="t in settlementData.transfers" :key="t.from + t.to" class="bg-jp-accent/10 p-3 rounded-lg flex items-center justify-between">
+                            <div class="flex items-center gap-2">
+                                <span class="font-bold text-jp-text">{{ t.from }}</span>
+                                <i class="fa-solid fa-arrow-right text-gray-400 text-xs"></i>
+                                <span class="font-bold text-jp-text">{{ t.to }}</span>
+                            </div>
+                            <span class="font-bold text-jp-accent">${{ t.amount.toFixed(1) }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </transition>
+
+        <transition name="modal">
+            <div v-if="showSyncModal" class="fixed inset-0 z-50 flex items-center justify-center px-4">
+                <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showSyncModal = false"></div>
+                <div class="bg-white w-full max-w-sm rounded-3xl p-6 relative z-10 shadow-2xl">
+                    <h3 class="text-lg font-bold mb-2">資料同步 (手動)</h3>
+                    <p class="text-xs text-gray-500 mb-4">因無後端伺服器，請透過複製文字來傳遞資料給旅伴。</p>
+                    
+                    <div class="space-y-3">
+                        <button @click="copyData" class="w-full bg-gray-100 hover:bg-gray-200 text-jp-text py-3 rounded-xl text-sm font-medium transition flex items-center justify-center gap-2">
+                            <i class="fa-regular fa-copy"></i> 複製我的記帳資料
+                        </button>
+                        <div class="relative">
+                            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-gray-200"></div></div>
+                            <div class="relative flex justify-center text-xs uppercase"><span class="bg-white px-2 text-gray-400">OR</span></div>
+                        </div>
+                        <textarea v-model="importString" rows="3" placeholder="在此貼上旅伴傳來的代碼..." class="w-full border bg-gray-50 rounded-xl p-2 text-xs focus:outline-none focus:border-jp-accent"></textarea>
+                        <button @click="importData" class="w-full bg-jp-accent text-white py-3 rounded-xl text-sm font-bold shadow-lg shadow-jp-accent/30">
+                            匯入並覆蓋資料
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </transition>
 
         <nav class="bg-white border-t flex justify-around items-center h-[80px] shrink-0 safe-bottom">
             <button @click="currentTab = 'trip'" :class="currentTab === 'trip' ? 'text-jp-accent' : 'text-gray-300'" class="flex flex-col items-center w-1/3"><i class="fa-solid fa-map"></i><span class="text-xs">行程</span></button>
@@ -192,8 +258,20 @@
                     currentTab: 'trip', 
                     activeDayIndex: 0,
                     loadingWeather: false,
+                    showSettlementModal: false,
+                    showSyncModal: false,
+                    importString: '',
                     expenses: JSON.parse(localStorage.getItem('us_trip_expenses')) || [],
                     newExpense: { title: '', amount: '', payer: '' },
+                    settlementData: { paid: {}, average: 0, transfers: [] },
+                    hotelList: [
+                         {date: "2/12 - 2/14", name: "Found Hotel Carlton", booker: "鄭"},
+                         {date: "2/14 - 2/15", name: "Crowne Plaza SFO", booker: "Juna"},
+                         {date: "2/15 - 2/16", name: "Holiday Inn Express Marina", booker: "Juna"},
+                         {date: "2/16 - 2/18", name: "Jockey Club Las Vegas", booker: "鄭"},
+                         {date: "2/18 - 2/19", name: "Atwell Suites Herderson", booker: "Juna"},
+                         {date: "2/19 - 2/21", name: "Hotel Burbank", booker: "溫"}
+                    ],
                     itinerary: [
                         { day: 1, date: "2/12 (四)", lat: 37.7749, lon: -122.4194, weather: "載入中...", weatherCode: 0, items: [
                             { time: "19:00", type: "transport", title: "抵達舊金山 (SFO)", desc: "搭 BART/Uber 前往市區。", location: "SFO Airport", image: "https://images.unsplash.com/photo-1521464302861-ce943915d1c3?w=800", tags: [{text: "✈️ JX012", type: "info"},{ text: "✈️ BR028", type: "info" }] },
@@ -262,6 +340,11 @@
                 },
                 getTagClass(type) { return type === 'important' ? 'text-white bg-tag-food' : 'text-jp-accent bg-blue-50'; },
                 openMap(loc) { if(loc) window.open(`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(loc)}`, '_blank'); },
+                getPayerColor(name) {
+                    if(!name) return 'text-gray-500';
+                    const colors = {'鄭': 'text-blue-600', 'Juna': 'text-purple-600', '溫': 'text-orange-600'};
+                    return colors[name] || 'text-jp-text';
+                },
                 async fetchWeather() {
                     this.loadingWeather = true;
                     try {
@@ -287,13 +370,88 @@
                         ...this.newExpense,
                         date: new Date().toLocaleDateString('zh-TW', { month: '2-digit', day: '2-digit' })
                     });
-                    // 清空輸入，保留「新增者」方便連續輸入
                     const lastPayer = this.newExpense.payer;
                     this.newExpense = { title: '', amount: '', payer: lastPayer };
                 },
                 deleteExpense(index) {
                     if(confirm("確定要刪除這筆支出嗎？")) {
                         this.expenses.splice(index, 1);
+                    }
+                },
+                calculateSettlement() {
+                    const balances = {};
+                    let total = 0;
+                    
+                    // 1. 統計每個人付了多少
+                    this.expenses.forEach(e => {
+                        const name = e.payer ? e.payer.trim() : '未具名';
+                        if (!balances[name]) balances[name] = 0;
+                        balances[name] += parseFloat(e.amount);
+                        total += parseFloat(e.amount);
+                    });
+
+                    // 2. 假設 '未具名' 不參與分帳計算（或你可以決定要不要算進去）
+                    // 這裡假設是三個人均分，但只計算有名字出現過的人
+                    const people = Object.keys(balances).filter(n => n !== '未具名');
+                    if (people.length === 0) {
+                        alert("請先輸入付款人姓名才能計算");
+                        return;
+                    }
+
+                    const average = total / people.length;
+                    
+                    // 3. 計算差額
+                    let debtors = []; // 少付錢的人 (要給錢)
+                    let creditors = []; // 多付錢的人 (要收錢)
+
+                    people.forEach(p => {
+                        const paid = balances[p];
+                        const diff = paid - average;
+                        if (diff < -0.01) debtors.push({ name: p, amount: -diff }); // 存正數
+                        else if (diff > 0.01) creditors.push({ name: p, amount: diff });
+                    });
+
+                    // 4. 配對 (簡單貪婪算法)
+                    let transfers = [];
+                    let i = 0; // debtor index
+                    let j = 0; // creditor index
+
+                    while (i < debtors.length && j < creditors.length) {
+                        let amount = Math.min(debtors[i].amount, creditors[j].amount);
+                        transfers.push({
+                            from: debtors[i].name,
+                            to: creditors[j].name,
+                            amount: amount
+                        });
+
+                        debtors[i].amount -= amount;
+                        creditors[j].amount -= amount;
+
+                        if (debtors[i].amount < 0.01) i++;
+                        if (creditors[j].amount < 0.01) j++;
+                    }
+
+                    this.settlementData = { paid: balances, average, transfers };
+                    this.showSettlementModal = true;
+                },
+                copyData() {
+                    const data = JSON.stringify(this.expenses);
+                    navigator.clipboard.writeText(data).then(() => {
+                        alert("資料已複製！請貼給旅伴。");
+                    });
+                },
+                importData() {
+                    try {
+                        if(!this.importString) return;
+                        const data = JSON.parse(this.importString);
+                        if(confirm("這將會覆蓋你目前的記帳資料，確定嗎？")) {
+                            this.expenses = data;
+                            this.showSyncModal = false;
+                            this.importString = '';
+                            alert("匯入成功！");
+                        }
+                    } catch(e) {
+                        alert("格式錯誤，請確認複製的內容是否正確。");
                     }
                 }
             },
